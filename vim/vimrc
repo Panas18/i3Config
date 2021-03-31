@@ -1,0 +1,6 @@
+vnoremap <C-y> "+y
+map <C-p> "+p
+set number relativenumber
+syntax on
+filetype plugin indent on
+colorscheme oceanic_material
