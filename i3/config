@@ -136,7 +136,7 @@ bindsym $mod+Shift+9 move container to workspace  $ws9
 bindsym $mod+Shift+0 move container to workspace  $ws10
 
 #assign [class="Thunar"] $ws4
-assign [class="Brave-browser"] $ws2
+assign [class="firefox"] $ws2
 assign [class="ViberPC"] $ws6
 assign [class="qBittorrent"] $ws9
 assign [class="vlc"] $ws4
