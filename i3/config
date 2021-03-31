@@ -45,7 +45,7 @@ bindsym $mod+Shift+q kill
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
 # installed.
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
-bindsym $mod+d exec rofi -show drun
+bindsym $mod+space exec rofi -show drun
 bindsym $mod+Tab exec rofi -show window
 
 # change focus
@@ -90,7 +90,7 @@ bindsym $mod+e layout toggle split
 bindsym $mod+Shift+space floating toggle
 
 # change focus between tiling / floating windows
-bindsym $mod+space focus mode_toggle
+#bindsym $mod+space focus mode_toggle
 
 # focus the parent container
 bindsym $mod+a focus parent
@@ -238,12 +238,12 @@ colors {
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
-bindsym $mod+b exec brave
+bindsym $mod+b exec firefox
 bindsym $mod+t exec pcmanfm 
 bindsym $mod+m exec spotify
 bindsym $mod+o exec freeoffice-textmaker
 bindsym $mod+p exec code
-bindsym --release $mod+Shift+d exec xkill
+bindsym --release $mod+d exec xkill
 bindsym  $mod+y exec xfce4-terminal -e "ranger"
 bindsym $mod+c exec rofi -show calc -modi calc -no-show-match -no-sort
 bindsym $mod+Shift+c exec rofi -show emoji -modi emoji -no-show-match -no-sort
