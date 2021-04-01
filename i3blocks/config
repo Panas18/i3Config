@@ -85,7 +85,7 @@ label=
 command=~/.scripts/battery
 #markup=pango
 interval=1
-label=Bat 
+label= 
 
 #Battery
 #[battery]
@@ -108,12 +108,9 @@ interval=1
 # Support multiple chips, though lm-sensors.
 # The script may be called with -w and -c switches to specify thresholds,
 # see the script for details.
-[temperature]
+[new_temp]
 label=  
 interval=1
 
-[name]
-label="Hello world"
-command="Hello world"
 
 
