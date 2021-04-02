@@ -83,9 +83,9 @@ label=
 
 [battery]
 command=~/.scripts/battery
-#markup=pango
+markup=pango
 interval=1
-label= 
+#label= 
 
 #Battery
 #[battery]

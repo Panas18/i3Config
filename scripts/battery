@@ -8,18 +8,36 @@ BATTERY_TIME=$(echo "${BATTERY_INFO}" | awk '/^Battery/ {print($5)}')
 
 URGENT_VALUE=15
 
+
 if [[ "${BATTERY_STATE}" = "Charging" ]]; then
-  echo "${BATTERY_POWER}%  ${BATTERY_TIME}⚡"
-  echo "${BATTERY_POWER}% ⚡"
-  echo ""
+	if [ "${BATTERY_POWER}" -ge "80" ]; then
+		echo "  ${BATTERY_POWER}%  ${BATTERY_TIME} ⚡"
+	elif [ "${BATTERY_POWER}" -lt "80" ] && [ "${BATTERY_POWER}" -ge "60" ]; then
+	  	echo "  ${BATTERY_POWER}%  ${BATTERY_TIME} ⚡"
+	elif [ "${BATTERY_POWER}" -lt "60" ] && [ "${BATTERY_POWER}" -ge "40" ]; then
+		echo "  ${BATTERY_POWER}%  ${BATTERY_TIME} ⚡"
+	elif [ "${BATTERY_POWER}" -lt "40" ] && [ "${BATTERY_POWER}" -ge "20" ]; then
+		echo "  ${BATTERY_POWER}%  ${BATTERY_TIME} ⚡"
+	elif [ "${BATTERY_POWER}" -lt "20" ]; then
+		echo "  ${BATTERY_POWER}%  ${BATTERY_TIME} ⚡"
+
+	fi	
 elif [[ "${BATTERY_STATE}" = "Discharging" ]]; then
-  echo "${BATTERY_POWER}%  ${BATTERY_TIME} Remaining"
-  echo "${BATTERY_POWER}%"
-  echo ""
+	if [ "${BATTERY_POWER}" -ge "80" ]; then
+		echo "  ${BATTERY_POWER}%  ${BATTERY_TIME} Remaining"
+	elif [ "${BATTERY_POWER}" -lt "80" ] && [ "${BATTERY_POWER}" -ge "60" ]; then
+	  	echo "  ${BATTERY_POWER}%  ${BATTERY_TIME} Remaining"
+	elif [ "${BATTERY_POWER}" -lt "60" ] && [ "${BATTERY_POWER}" -ge "40" ]; then
+		echo "  ${BATTERY_POWER}%  ${BATTERY_TIME} Remaining"
+	elif [ "${BATTERY_POWER}" -lt "40" ] && [ "${BATTERY_POWER}" -ge "20" ]; then
+		echo "  ${BATTERY_POWER}%  ${BATTERY_TIME} Remaining"
+	elif [ "${BATTERY_POWER}" -lt "20" ]; then
+		echo "  ${BATTERY_POWER}%  ${BATTERY_TIME} Remaining"
+
+	fi
 else
   echo "${BATTERY_POWER}%"
   echo "${BATTERY_POWER}%"
-  echo ""
 fi
 
 if [[ "${BATTERY_POWER}" -le "${URGENT_VALUE}" ]]; then
