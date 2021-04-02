@@ -33,11 +33,11 @@ elif [[ "${BATTERY_STATE}" = "Discharging" ]]; then
 		echo "  ${BATTERY_POWER}%  ${BATTERY_TIME} Remaining"
 	elif [ "${BATTERY_POWER}" -lt "20" ]; then
 		echo "  ${BATTERY_POWER}%  ${BATTERY_TIME} Remaining"
-
+s
 	fi
 else
-  echo "${BATTERY_POWER}%"
-  echo "${BATTERY_POWER}%"
+	echo "  ${BATTERY_POWER}%  ${BATTERY_TIME} ⚡"
+  	echo "${BATTERY_POWER}%"
 fi
 
 if [[ "${BATTERY_POWER}" -le "${URGENT_VALUE}" ]]; then
