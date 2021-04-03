@@ -112,5 +112,8 @@ interval=1
 label=  
 interval=1
 
+[wifi_name]
+command=~/.scripts/wifi_name
+interval=1
 
 
