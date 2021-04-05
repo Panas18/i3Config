@@ -74,7 +74,7 @@ seperator=true
 #Cpu usages
 [cpu_usages]
 command=~/.scripts/cpu_usages
-interval=1
+interval=2
 label=  
 #min_width=CPU: 100.00%
 #T_WARN=50

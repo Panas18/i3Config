@@ -100,16 +100,16 @@ bindsym $mod+a focus parent
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
-set $ws1 "1: "
-set $ws2 "2: "
-set $ws3 "3: "
+set $ws1 "1:  "
+set $ws2 "2:  "
+set $ws3 "3:  "
 set $ws4 "4: "
 set $ws5 "5: "
-set $ws6 "6: "
+set $ws6 "6:  "
 set $ws7 "7: "
-set $ws8 "8: "
-set $ws9 "9: "
-set $ws10 "10: "
+set $ws8 "8:  "
+set $ws9 "9:  "
+set $ws10 "10:  "
 
 # switch to workspace
 bindsym $mod+1 workspace  $ws1
@@ -239,7 +239,7 @@ colors {
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
 bindsym $mod+b exec firefox
-bindsym $mod+t exec pcmanfm 
+bindsym $mod+t exec nautilus
 bindsym $mod+m exec spotify
 bindsym $mod+o exec freeoffice-textmaker
 bindsym $mod+p exec code
@@ -265,7 +265,7 @@ exec_always --no-startup-id xinput set-prop 13 317 1
 exec_always --no-startup-id xinput set-prop 14 309 1
 exec_always --no-startup-id xinput set-prop 14 308 1
 exec_always --no-startup-id xinput set-prop 13 305 1
-exec_always --no-startup-id xinput set-prop 14 317 1
+exec_always --no-startup-id xinput set-prop 14 318 1
 
 ###############################################################
 #Audio Controls
