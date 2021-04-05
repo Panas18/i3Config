@@ -1,0 +1,4 @@
+#!/bin/bash
+ssid=$(iwgetid |  awk '/^wlo1/ {print($2, $3)}' | awk '/^ESSID/ {print substr($0,7)}')
+echo $ssid
+

@@ -1,3 +1,0 @@
-#!/bin/bash
-ssid=$(iwgetid | awk '/^wlo1/ {print substr($2,7)}')
-echo $ssid
