@@ -4,3 +4,7 @@ set number relativenumber
 syntax on
 filetype plugin indent on
 colorscheme oceanic_material
+set tabstop=4
+set shiftwidth=4
+set expandtab
+set enc=utf-8
