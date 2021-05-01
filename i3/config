@@ -29,7 +29,6 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec --no-startup-id nm-applet
 
-
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
 
@@ -47,6 +46,9 @@ bindsym $mod+Shift+q kill
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 bindsym $mod+space exec rofi -show drun
 bindsym $mod+Tab exec rofi -show window
+
+# Polybar
+#exec_always --no-startup-id /home/panas/.config/polybar/launch.sh
 
 # change focus
 bindsym $mod+h focus left
@@ -239,7 +241,7 @@ colors {
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
 bindsym $mod+b exec firefox
-bindsym $mod+t exec nautilus
+bindsym $mod+t exec thunar
 bindsym $mod+m exec spotify
 bindsym $mod+o exec freeoffice-textmaker
 bindsym $mod+p exec code
@@ -266,6 +268,15 @@ exec_always --no-startup-id xinput set-prop 14 309 1
 exec_always --no-startup-id xinput set-prop 14 308 1
 exec_always --no-startup-id xinput set-prop 13 305 1
 exec_always --no-startup-id xinput set-prop 14 318 1
+#exec_always --no-startup-id /home/panas/.config/i3/alternating_layouts.py
+
+##############################################################
+# Media player controls
+#############################################################
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+
 
 ###############################################################
 #Audio Controls
@@ -274,7 +285,9 @@ bindsym XF86AudioRaiseVolume exec --no-startup-id amixer -q sset Master 5%+ unmu
 bindsym XF86AudioLowerVolume exec --no-startup-id amixer -q sset Master 5%- unmute #decrease sound volume
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle # mute sound
 
-####Brightness control##########
+#################################################################
+#Brightness control
+#################################################################
 bindsym XF86MonBrightnessUp exec light -A 5
 bindsym XF86MonBrightnessDown exec "light -U 5
 

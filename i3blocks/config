@@ -108,12 +108,13 @@ interval=1
 # Support multiple chips, though lm-sensors.
 # The script may be called with -w and -c switches to specify thresholds,
 # see the script for details.
-[new_temp]
+[temperature]
 label=  
 interval=1
+command=~/.scripts/temperature
 
-[wifi_name]
-command=~/.scripts/wifi_name
+[network_ssid]
+command=~/.scripts/network_ssid
 interval=1
 
 
