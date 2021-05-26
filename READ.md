@@ -1,0 +1,1 @@
+# i3wm CONFIG FILES
