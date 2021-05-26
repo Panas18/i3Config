@@ -82,9 +82,7 @@ bindsym $mod+v split v
 
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
-
-# change container layout (stacked, tabbed, toggle split)
-bindsym $mod+s layout stacking
+# change container layout (stacked, tabbed, toggle split) bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
 
@@ -105,11 +103,11 @@ bindsym $mod+a focus parent
 set $ws1 "1:  "
 set $ws2 "2:  "
 set $ws3 "3:  "
-set $ws4 "4: "
-set $ws5 "5: "
-set $ws6 "6:  "
+set $ws4 "4:  "
+set $ws5 "5: "
+set $ws6 "6: "
 set $ws7 "7: "
-set $ws8 "8:  "
+set $ws8 "8: "
 set $ws9 "9:  "
 set $ws10 "10:  "
 
@@ -139,9 +137,9 @@ bindsym $mod+Shift+0 move container to workspace  $ws10
 
 #assign [class="Thunar"] $ws4
 assign [class="firefox"] $ws2
-assign [class="ViberPC"] $ws6
+assign [class="ViberPC"] $ws4
 assign [class="qBittorrent"] $ws9
-assign [class="vlc"] $ws4
+assign [class="vlc"] $ws5
 assign [class="Spotify"] $ws10
 
 # reload the configuration file
@@ -268,6 +266,7 @@ exec_always --no-startup-id xinput set-prop 14 309 1
 exec_always --no-startup-id xinput set-prop 14 308 1
 exec_always --no-startup-id xinput set-prop 13 305 1
 exec_always --no-startup-id xinput set-prop 14 318 1
+focus_follows_mouse no
 #exec_always --no-startup-id /home/panas/.config/i3/alternating_layouts.py
 
 ##############################################################
@@ -281,15 +280,17 @@ bindsym XF86AudioPrev exec playerctl previous
 ###############################################################
 #Audio Controls
 ###############################################################
-bindsym XF86AudioRaiseVolume exec --no-startup-id amixer -q sset Master 5%+ unmute #increase sound volume
-bindsym XF86AudioLowerVolume exec --no-startup-id amixer -q sset Master 5%- unmute #decrease sound volume
+#bindsym XF86AudioRaiseVolume exec --no-startup-id amixer -q sset Master 5%+ unmute #increase sound volume
+bindsym XF86AudioRaiseVolume exec --no-startup-id ~/.scripts/vol_limit
+#bindsym XF86AudioLowerVolume exec --no-startup-id amixer -q sset Master 5%- unmute #decrease sound volume
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle # mute sound
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume 0 -5% #decrease sound volume
 
 #################################################################
 #Brightness control
 #################################################################
-bindsym XF86MonBrightnessUp exec light -A 5
-bindsym XF86MonBrightnessDown exec "light -U 5
+bindsym XF86MonBrightnessUp exec light -A 1
+bindsym XF86MonBrightnessDown exec "light -U 1
 
 
 # Set shut down, restart and locking features

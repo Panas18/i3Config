@@ -1,0 +1,20 @@
+#!/bin/bash
+
+volume=0
+volume_info=$(amixer sget Master)
+volume_value=$(echo "${volume_info}" | grep -o '[0-9]\+%' |tr -d '%' | head -n 1)
+volume_status=$(echo "${volume_info}" | grep -wo "on\|off" | head -n 1)
+
+output="${volume_value}%"
+if [[ "${volume_status}" = "off" ]]; then
+    output='MUTE'
+fi
+
+echo $output
+
+
+if [[ "${volume_value}" -gt '100'  || "${volume_status}" = "off" ]]; then
+    exit 33
+fi
+
+

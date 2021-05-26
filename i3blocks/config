@@ -33,13 +33,22 @@ markup=none
 # The first parameter sets the step (and units to display)
 # The second parameter overrides the mixer selection
 # See the script for details.
+
+[brighness]
+label=  
+#instance=PCM
+interval=1
+signal=10
+seperator=true
+command=~/.scripts/brightness
+
 [volume]
-label=Volume 
+label= 
 instance=Master
 #instance=PCM
 interval=1
 signal=10
-command=~/.scripts/volume
+command=~/.scripts/new_volume
 
 # Memory usage
 #
@@ -113,8 +122,18 @@ label=
 interval=1
 command=~/.scripts/temperature
 
+
+
+
 [network_ssid]
-command=~/.scripts/network_ssid
 interval=1
+separator=false
+command=~/.scripts/network_ssid
+
+[bandwidth]
+interval=10
+command=~/.scripts/bandwidth
+separator=true
+
 
 
