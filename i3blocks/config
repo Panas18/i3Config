@@ -77,14 +77,13 @@ separator=false
 command=~/.scripts/root_disk
 LABEL=/ 
 interval=5
-seperator=true
 
 
 #Cpu usages
 [cpu_usages]
+LABEL=  
 command=~/.scripts/cpu_usages
 interval=2
-label=  
 #min_width=CPU: 100.00%
 #T_WARN=50
 #T_CRIT=80
@@ -125,13 +124,13 @@ command=~/.scripts/temperature
 
 
 
-[network_ssid]
-interval=1
-separator=false
-command=~/.scripts/network_ssid
-
+#[network_ssid]
+#interval=1
+#separator=false
+#command=~/.scripts/network_ssid
+#
 [bandwidth]
-interval=10
+interval=5
 command=~/.scripts/bandwidth
 separator=true
 
