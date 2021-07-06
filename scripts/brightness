@@ -11,7 +11,6 @@ elif [[ "${BLOCK_BUTTON}" -eq 3 ]]; then
   xbacklight -dec 5
 fi
 
-URGENT_VALUE=80
 
 if [[ "${METHOD}" = "xrandr" ]]; then
   device="${BLOCK_INSTANCE:-primary}"
@@ -51,7 +50,4 @@ percent=${percent%.*}
 echo "${percent}%"
 echo "${percent}%"
 
-if [[ "${percent}" -gt "${URGENT_VALUE}" ]]; then
-  exit 33
-fi
 

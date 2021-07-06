@@ -43,7 +43,7 @@ seperator=true
 command=~/.scripts/brightness
 
 [volume]
-label= 
+label= 
 instance=Master
 #instance=PCM
 interval=1
@@ -55,7 +55,7 @@ command=~/.scripts/new_volume
 # The type defaults to "mem" if the instance is not specified.
 [memory]
 command=~/.scripts/memory
-label=  
+label=  
 separator=true
 interval=1
 
@@ -81,7 +81,7 @@ interval=5
 
 #Cpu usages
 [cpu_usages]
-LABEL=  
+LABEL=  
 command=~/.scripts/cpu_usages
 interval=2
 #min_width=CPU: 100.00%
