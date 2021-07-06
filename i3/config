@@ -44,7 +44,7 @@ bindsym $mod+Shift+q kill
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
 # installed.
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
-bindsym $mod+space exec rofi -show drun
+bindsym $mod+space exec rofi -show run
 bindsym $mod+Tab exec rofi -show window
 
 # Polybar
@@ -104,8 +104,8 @@ set $ws1 "1:  "
 set $ws2 "2:  "
 set $ws3 "3:  "
 set $ws4 "4:  "
-set $ws5 "5: "
-set $ws6 "6: "
+set $ws5 "5:  "
+set $ws6 "6:  "
 set $ws7 "7: "
 set $ws8 "8: "
 set $ws9 "9:  "
@@ -139,7 +139,7 @@ assign [class="firefox"] $ws2
 assign [class="ViberPC"] $ws4
 assign [class="Microsoft Teams - Preview"] $ws4
 assign [class="qBittorrent"] $ws9
-assign [class="vlc"] $ws5
+assign [class="vlc"] $ws6
 assign [class="Spotify"] $ws10
 
 # reload the configuration file
@@ -254,6 +254,8 @@ exec --no-startup-id nm-applet
 exec_always --no-startup-id ff-theme-util
 exec_always --no-startup-id fix_xcursor
 exec_always --no-startup-id xset -b
+
+exec_always --no-startup-id xinput set-prop 15 339 1
 exec_always --no-startup-id xinput set-prop 14 316 1
 exec_always --no-startup-id xinput set-prop 13 317 1
 exec_always --no-startup-id xinput set-prop 14 309 1
@@ -261,7 +263,7 @@ exec_always --no-startup-id xinput set-prop 14 308 1
 exec_always --no-startup-id xinput set-prop 13 305 1
 exec_always --no-startup-id xinput set-prop 14 318 1
 focus_follows_mouse no
-workspace_auto_back_and_forth yes
+#workspace_auto_back_and_forth yes
 
 ##############################################################
 # Media player controls
@@ -304,8 +306,7 @@ bindsym XF86MonBrightnessDown exec "light -U 1
 #PowerKeys
 bindsym $mod+Ctrl+Delete exec shutdown now
 bindsym $mod+Ctrl+BackSpace exec reboot
-bindsym $mod+Delete exec i3lock -i ~/Pictures/Wallpaper/hello.png 
-
+bindsym $mod+Ctrl+Print exec systemctl suspend 
 
 #screenshot
 bindsym Print exec --no-startup-id i3-scrot #Screenshot of full Desktop
