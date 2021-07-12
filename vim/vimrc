@@ -1,3 +1,9 @@
+call plug#begin('~/.vim/plugged')
+Plug 'Yggdroot/indentLine'
+Plug 'vim-airline/vim-airline'
+Plug 'preservim/nerdtree'
+Plug  'dense-analysis/ale' 
+call plug#end()
 vnoremap <C-y> "+y
 map <C-p> "+p
 set number relativenumber
@@ -9,3 +15,5 @@ set shiftwidth=4
 set expandtab
 set enc=utf-8
 autocmd InsertEnter,InsertLeave * set cul!
+nnoremap <C-n> :NERDTree<CR>
+nnoremap <C-t> :NERDTreeToggle<CR>
