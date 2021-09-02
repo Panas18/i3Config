@@ -1,20 +1,21 @@
-#!/bin/bash
+#!/home/panas/anaconda3/bin/python
 
-volume=0
-volume_info=$(amixer sget Master)
-volume_value=$(echo "${volume_info}" | grep -o '[0-9]\+%' |tr -d '%' | head -n 1)
-volume_status=$(echo "${volume_info}" | grep -wo "on\|off" | head -n 1)
+import subprocess
 
-output="${volume_value}%"
-if [[ "${volume_status}" = "off" ]]; then
-    output='MUTE'
-fi
+volume_info = subprocess.run(
+    ["amixer", "sget", "Master"], stdout=subprocess.PIPE, text=True).stdout
+volume_status = 'on' if volume_info[-3] == 'n' else "off"
+volume_value = int(subprocess.run(
+    ["pamixer", "--get-volume"], stdout=subprocess.PIPE).stdout.decode('utf-8'))
 
-echo $output
+if volume_status == 'off':
+    print("Mute")
+    print('Mute')
+    print("#FFFC00")
 
+else:
+    print(f"{volume_value}%")
+    print(f"{volume_value}%")
 
-if [[ "${volume_value}" -gt '100'  || "${volume_status}" = "off" ]]; then
-    exit 33
-fi
-
-
+    if volume_value > 100:
+        print("#FFFC00")
