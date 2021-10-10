@@ -1,1 +1,15 @@
-/home/panas/.local/scripts/volume_down
+#!/bin/sh
+
+sink=0
+volume=$(pactl list sinks | perl -slne '
+   if (/^Sink #(\d+)$/) {
+       $cur_sink = $1;
+   } elsif (/^\s+Volume:.*? (\d+)% / && $sink eq $cur_sink)     {
+       print $1;
+   }
+' -- -sink="$sink")
+
+pactl set-sink-volume 0 -5%
+pkill -SIGRTMIN+11 i3blocks
+notify-send  "🎧 ${volume} / 150%" -h string:x-canonical-private-synchronous:anything
+

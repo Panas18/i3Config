@@ -1,1 +1,6 @@
-/home/panas/.local/scripts/brightness_down
+#!/bin/bash
+
+light -U 5 
+brightness=$(light)
+pkill -SIGRTMIN+10 i3blocks
+notify-send "🔆 $(printf "%.0f" $brightness)% / 100" -h string:x-canonical-private-synchronous:anything

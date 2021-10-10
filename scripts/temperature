@@ -1,1 +1,9 @@
-/home/panas/.local/scripts/temperature
+#!/bin/bash
+temperature=$(sensors | awk '/^Package/ {print substr($4, 2, 2)}') 
+echo "$temperature °C"
+
+cric_temp=80
+
+if [[ "${temperature}" -ge "${cric_temp}" ]]; then
+	exit 33
+fi

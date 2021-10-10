@@ -1,1 +1,25 @@
-/home/panas/.local/scripts/volume
+#!/bin/bash
+sink=0
+volume=$(pactl list sinks | perl -slne '
+    if (/^Sink #(\d+)$/) {
+        $cur_sink = $1;
+    } elsif (/^\s+Volume:.*? (\d+)% / && $sink eq $cur_sink) {
+        print $1;
+    }
+' -- -sink="$sink")
+
+volume_info=$(amixer sget Master)
+volume_status=$(echo "${volume_info}" | grep -wo "on\|off" | head -n 1)
+
+if [[ "${volume_status}" = "off" ]]; then
+    echo "🎧Mute"
+    echo "🎧Mute"
+    echo "#fffc00"
+else
+    echo "🎧${volume}%"
+    echo "🎧${volume}%"
+
+    if [[ "${volume}" -gt "100" ]]; then
+        echo "#fffc00"
+    fi
+fi
