@@ -119,3 +119,5 @@ unset __conda_setup
 # <<< conda initialize <<<
 
 alias program="cd ~/programming"
+alias py='python'
+alias jn='jupyter notebook'

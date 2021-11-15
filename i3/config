@@ -300,6 +300,7 @@ exec_always --no-startup-id ff-theme-util
 exec_always --no-startup-id fix_xcursor
 exec_always --no-startup-id xmodmap -e 'clear lock'
 exec_always --no-startup-id copyq
+exec xinput set-prop 15 338 1
 
 # Color palette used for the terminal ( ~/.Xresources file )
 # Colors are gathered based on the documentation:
