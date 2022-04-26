@@ -70,15 +70,17 @@ ZSH_THEME="gallois"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(archlinux zsh-syntax-highlighting zsh-autosuggestions)
+#plugins=(archlinux zsh-syntax-highlighting zsh-autosuggestions)
 
+plugins=(zsh-syntax-highlighting)
 source $ZSH/oh-my-zsh.sh
 alias vim='nvim'
 fortune | cowsay -f tux | lolcat
 #neofetch
 export PATH=$PATH:/home/panas/.local/scripts
-# User configuration
+export PATH=$PATH:/home/panas/.local/bin
 
+#User configuration
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
@@ -120,4 +122,10 @@ unset __conda_setup
 
 alias program="cd ~/programming"
 alias py='python'
-alias jn='jupyter notebook'
+alias jl='jupyter lab'
+alias homl='cd /home/panas/programming/ml/studies/homl-exercises'
+alias balena='sudo balena-etcher-electron'
+alias vim='nvim'
+alias rm-exit-docker="docker ps -a | grep Exit | cut -d ' ' -f1 | xargs docker rm"
+alias act_venv="source venv/bin/activate && conda deactivate"
+alias update_pip="python -m pip install --upgrade pip"
