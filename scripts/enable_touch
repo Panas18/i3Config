@@ -1,0 +1,5 @@
+#!/bin/bash
+
+touchpad_id=$(xinput | grep Touchpad | cut -f 2 | grep -o '[0-9]\+')
+tap_id=$(xinput list-props $touchpad_id | grep "Tapping Enabled" -m 1 | grep -o '[0-9][0-9][0-9]')
+xinput set-prop $touchpad_id $tap_id 1
