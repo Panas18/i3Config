@@ -2,4 +2,6 @@
 
 touchpad_id=$(xinput | grep Touchpad | cut -f 2 | grep -o '[0-9]\+')
 tap_id=$(xinput list-props $touchpad_id | grep "Tapping Enabled" -m 1 | grep -o '[0-9][0-9][0-9]')
+scroll_id=$(xinput list-props $touchpad_id | grep "Natural Scrolling" -m 1 | grep -o '[0-9][0-9][0-9]')
 xinput set-prop $touchpad_id $tap_id 1
+xinput set-prop $touchpad_id $scroll_id 1

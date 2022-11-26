@@ -10,6 +10,4 @@ volume=$(pactl list sinks | perl -slne '
 ' -- -sink="$sink")
 
 pactl set-sink-volume 0 -5%
-pkill -SIGRTMIN+11 i3blocks
-notify-send  "🎧 ${volume} / 150%" -h string:x-canonical-private-synchronous:anything
 

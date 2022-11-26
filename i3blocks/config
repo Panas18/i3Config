@@ -28,14 +28,15 @@ separator_block_width=7
 markup=none
 
 
+
 [brighness]
 interval=once
 signal=10
-seperator=true
+separator=true
 command=~/.local/scripts/brightness
 
+
 [volume]
-#label= 
 #instance=PCM
 interval=once
 signal=11
@@ -46,54 +47,48 @@ command=~/.local/scripts/volume
 # The type defaults to "mem" if the instance is not specified.
 [memory]
 command=~/.local/scripts/memory
-label=
 separator=true
 interval=1
+label=
+
 
 
 # Disk usage
-#
-# The directory defaults to $HOME if the instance is not specified.
-# The script may be called with a optional argument to set the alert
-# (defaults to 10 for 10%).
-#[disk]
-#command=~/.scripts/disk
-#LABEL=~
-##DIR=$HOME
-##ALERT_LOW=10
-#interval=5
-#separator=false
+
+[root]
+command=~/.local/scripts/root_disk
+interval=5
+label=/
 
 [disk]
-command=~/.local/scripts/root_disk
-LABEL=/ 
+command=~/.local/scripts/disk
 interval=5
-
+label=
 
 #Cpu usages
 [cpu_usages]
-LABEL=  
 command=~/.local/scripts/cpu_usages
 interval=2
-#min_width=CPU: 100.00%
-#T_WARN=50
-#T_CRIT=80
-#DECIMALS=2
+label=
+
 
 [battery]
 command=~/.local/scripts/battery
 markup=pango
 interval=1
-#label= 
 
 
 # Date Time
 [time]
-label= 
-command=date +'%a, %b %d, %Y  %T'
+command=date +'%a, %b %d, %T'
 #command=date -u
 interval=1
 color=#a0ee45
+
+[bandwidth]
+command=~/.local/scripts/bandwidth_c/bandwidth2
+interval=persist
+markup=pango
 
 # Temperature
 #
@@ -101,18 +96,6 @@ color=#a0ee45
 # The script may be called with -w and -c switches to specify thresholds,
 # see the script for details.
 [temperature]
-label=🌡️
 interval=1
 command=~/.local/scripts/temperature
-
-
-#[network_ssid]
-#interval=1
-#separator=false
-#command=~/.scripts/network_ssid
-
-
-[bandwidth]
-interval=5
-command=~/.local/scripts/bandwidth
-separator=true
+label=
