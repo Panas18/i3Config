@@ -368,7 +368,7 @@ colors {
 
 
 ######my command ############
-bindsym $mod+b exec brave-browser
+bindsym $mod+b exec brave
 bindsym $mod+t exec thunar 
 bindsym $mod+m exec spotify
 bindsym $mod+p exec code
@@ -387,4 +387,3 @@ bindsym  XF86AudioPrev exec playerctl previous
 bindsym $mod+Ctrl+Delete exec shutdown now
 bindsym $mod+Ctrl+BackSpace exec reboot
 bindsym $mod+Ctrl+Print exec systemctl suspend
-

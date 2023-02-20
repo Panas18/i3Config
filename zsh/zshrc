@@ -2,7 +2,7 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="/home/panas.tiwari/.oh-my-zsh"
+export ZSH="/home/$USER/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case, to know which specific one was loaded, run: echo $RANDOM_THEME See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
@@ -77,7 +77,7 @@ plugins=(zsh-syntax-highlighting zsh-autosuggestions)
 source $ZSH/oh-my-zsh.sh
 alias vim='nvim'
 fortune | cowsay -f tux | lolcat
-export PATH=$PATH:/home/panas.tiwari/.local/scripts
+export PATH=$PATH:/home/$USER/.local/scripts
 
 #User configuration
 # export MANPATH="/usr/local/man:$MANPATH"
@@ -110,6 +110,6 @@ export PATH=$PATH:/home/panas.tiwari/.local/scripts
 alias night="redshift -P -O 5000"
 alias day="redshift -P -O 6500"
 alias start='yarn start --typescript'
-alias vpn='sudo openvpn --config ~/Documents/lf/vpn/vpn-conf.ovpn'
 
 enable_touch
+setxkbmap
