@@ -73,8 +73,8 @@ bindsym $mod+F5 exec terminal -e 'mocp'
 #bindsym $mod+Ctrl+t exec --no-startup-id picom -b
 #bindsym $mod+Shift+d --release exec "killall dunst; exec notify-send 'restart dunst'"
 #bindsym Print exec --no-startup-id i3-scrot
-bindsym $mod+Print --release exec --no-startup-id scrot -d
-bindsym $mod+Shift+Print --release exec --no-startup-id scrot -s
+bindsym $mod+Print --release exec --no-startup-id maim "/home/$USER/Pictures/screenshots/$(date).png" 
+bindsym Shift+Print --release exec --no-startup-id scrot -s "/home/$USER/Pictures/screenshots/$(date).png" 
 
 focus_follows_mouse no
 
@@ -228,6 +228,7 @@ for_window [class="Skype"] floating enable border normal
 for_window [class="Timeset-gui"] floating enable border normal
 for_window [class="(?i)virtualbox"] floating enable border normal
 for_window [class="Xfburn"] floating enable
+for_window [class="Blueman-manager"] floating enable border normal
 
 # switch to workspace with urgent window automatically
 #for_window [urgent=latest] focus

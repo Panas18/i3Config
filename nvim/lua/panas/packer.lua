@@ -62,4 +62,6 @@ return require('packer').startup(function(use)
 	-- commenting with gc
 	use("numToStr/Comment.nvim")
 
+	use("szw/vim-maximizer") -- maximizes and restores current window
+
 end)

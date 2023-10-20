@@ -55,10 +55,10 @@ label=
 
 # Disk usage
 
-[root]
-command=~/.local/scripts/root_disk
-interval=5
-label=/
+# [root]
+# command=~/.local/scripts/root_disk
+# interval=5
+# label=/
 
 [disk]
 command=~/.local/scripts/disk
