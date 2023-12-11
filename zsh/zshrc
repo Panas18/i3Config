@@ -7,7 +7,7 @@ export ZSH="/home/$USER/.oh-my-zsh"
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case, to know which specific one was loaded, run: echo $RANDOM_THEME See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 #ZSH_THEME="gallois"
-ZSH_THEME="gallois"
+ZSH_THEME="tonotdo"
 
 # Set list of themes to pick from when loading at random Setting this variable when ZSH_THEME=random will cause zsh to load
 # a theme from this variable instead of looking in $ZSH/themes/
@@ -68,14 +68,17 @@ ZSH_THEME="gallois"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-#plugins=(archlinux zsh-syntax-highlighting zsh-autosuggestions)
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 plugins=(zsh-syntax-highlighting zsh-autosuggestions)
+
 source $ZSH/oh-my-zsh.sh
+
 alias vim='nvim'
+
+### nvm 
+export NVM_DIR=~/.nvm
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
 fortune | cowsay -f tux | lolcat
 export PATH=$PATH:/home/$USER/.local/scripts
 
@@ -103,13 +106,7 @@ export PATH=$PATH:/home/$USER/.local/scripts
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-
-# >>> conda initialize >>>
-
-
-alias night="redshift -P -O 5000"
-alias day="redshift -P -O 6500"
-alias start='yarn start --typescript'
-
-enable_touch
-setxkbmap
+alias billingExecutor="cd ~/Code/lf/signetic/billing/billing-executor-api/"
+alias ediNation="cd ~/Code/lf/signetic/billing/edi-parser-api/"
+alias startExec="npm run api:start:dev"
+alias start="npm run start:dev"

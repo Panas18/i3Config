@@ -3,5 +3,5 @@
 bright=$(light)
 bright=${bright%.*}
 
-echo " ${bright}%"
-echo " ${bright}%"
+echo " ${bright}%"
+echo " ${bright}%"

@@ -64,4 +64,6 @@ return require('packer').startup(function(use)
 
 	use("szw/vim-maximizer") -- maximizes and restores current window
 
+  use("ryanoasis/vim-devicons") -- vim icons
+
 end)

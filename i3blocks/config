@@ -49,8 +49,7 @@ command=~/.local/scripts/volume
 command=~/.local/scripts/memory
 separator=true
 interval=1
-label=
-
+label=
 
 
 # Disk usage
@@ -58,12 +57,12 @@ label=
 # [root]
 # command=~/.local/scripts/root_disk
 # interval=5
-# label=/
+# label=/jj
 
 [disk]
 command=~/.local/scripts/disk
 interval=5
-label=
+label=
 
 #Cpu usages
 [cpu_usages]
@@ -98,4 +97,4 @@ markup=pango
 [temperature]
 interval=1
 command=~/.local/scripts/temperature
-label=
+label=
