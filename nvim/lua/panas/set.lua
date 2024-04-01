@@ -12,7 +12,7 @@ vim.opt.encoding='utf-8'
 
 vim.opt.fileencoding='utf-8'
 
-vim.opt.wrap = false
+vim.opt.wrap = false 
 
 vim.opt.swapfile = false
 vim.opt.backup = false
@@ -34,4 +34,3 @@ vim.opt.clipboard:append("unnamedplus")
 vim.opt.colorcolumn = "80"
 
 vim.g.mapleader = " "
-

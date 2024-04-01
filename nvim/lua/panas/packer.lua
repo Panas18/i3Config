@@ -5,12 +5,16 @@ vim.cmd [[packadd packer.nvim]]
 
 return require('packer').startup(function(use)
   -- Packer can manage itself
+  use 'neoclide/coc.nvim'
   use 'wbthomason/packer.nvim'
   use {
-    'nvim-telescope/telescope.nvim', tag = '0.1.1',
+    'nvim-telescope/telescope.nvim', tag = '0.1.4 ',
     -- or                            , branch = '0.1.x',
     requires = { {'nvim-lua/plenary.nvim'} }
   }
+  use{'sainnhe/gruvbox-material'}
+  use{'AstroNvim/astrotheme'}
+  use 'morhetz/gruvbox';
   use({
     'rose-pine/neovim',
     as = 'rose-pine',
@@ -18,8 +22,9 @@ return require('packer').startup(function(use)
       require("rose-pine").setup()
       vim.cmd('colorscheme rose-pine')
     end
-  })
-  use('nvim-treesitter/nvim-treesitter', {run = ':TSUpdate'})
+  });
+  use('nvim-treesitter/nvim-treesitter', {run = ':TSUpdate'});
+  use('nvim-treesitter/nvim-tree-docs');
   use('nvim-treesitter/playground')
   use('mbbill/undotree');
   use('tpope/vim-fugitive');
@@ -63,5 +68,11 @@ return require('packer').startup(function(use)
 	use("numToStr/Comment.nvim")
 
 	use("szw/vim-maximizer") -- maximizes and restores current window
+
+  use("ryanoasis/vim-devicons") -- vim icons
+
+  use("nvim-lualine/lualine.nvim")
+
+  use ("folke/tokyonight.nvim")
 
 end)

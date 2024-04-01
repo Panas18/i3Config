@@ -7,3 +7,4 @@ end
 
 -- configure/enable gitsigns
 gitsigns.setup()
+

@@ -24,7 +24,7 @@ keymap.set("n", "<C-p>", "<cmd>Telescope find_files<cr>")
 
 keymap.set("n", "<leader>p", ":ToggleTerm<CR>")
 
-keymap.set("n", "<leader>e", ":NvimTreeFocus<CR>")
+keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>")
 
 keymap.set("n", "<leader>sm", ":MaximizerToggle<CR>")
 
@@ -32,3 +32,5 @@ keymap.set("n", "<C-l>", "<C-w>l")
 keymap.set("n", "<C-h>", "<C-w>h")
 keymap.set("n", "<C-j>", "<C-w>j")
 keymap.set("n", "<C-k>", "<C-w>k")
+
+vim.keymap.set('n', '<C-b>', ":Telescope buffers<CR>")

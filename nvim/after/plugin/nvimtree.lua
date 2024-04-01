@@ -12,7 +12,8 @@ vim.cmd([[ highlight NvimTreeIndentMarker guifg=#3FC5FF ]])
 
 nvimtree.setup({
   view = {
-    adaptive_size = true
+    adaptive_size = true,
+    side = 'right'
   },
   renderer = {
     icons = {
@@ -26,9 +27,11 @@ nvimtree.setup({
   },
   actions = {
     open_file = {
+      quit_on_open = true,
       window_picker = {
         enable  = false,
       },
     },
   },
 })
+
