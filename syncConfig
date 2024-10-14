@@ -1,0 +1,23 @@
+#! /bin/bash
+
+configDir="$HOME/.config"
+
+dirList=("$configDir/i3" "$configDir/kitty" "$HOME/.zshrc"
+	"$configDir/i3blocks" "$configDir/nvim"
+	"$HOME/.local/share/scripts" "$configDir/tmux/tmux.conf"
+	)
+
+syncConfigs(){
+	for dir in ${dirList[@]}; do
+		if test -d $dir || test -f $dir; then
+			printf "Copying config from $dir\n"
+			cp -r $dir ./
+		else
+			printf "Path not found: $dir \n"
+		fi
+	done
+}
+
+
+syncConfigs;
+
