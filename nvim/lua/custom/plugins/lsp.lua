@@ -2,6 +2,7 @@ return {
 	-- Main LSP Configuration
 	"neovim/nvim-lspconfig",
 	dependencies = {
+		{ "hrsh7th/cmp-buffer" },
 		-- Automatically install LSPs and related tools to stdpath for Neovim
 		{ "williamboman/mason.nvim", config = true, opts = {
 			ensure_installed = {
@@ -211,6 +212,17 @@ return {
 					server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
 					require("lspconfig")[server_name].setup(server)
 				end,
+			},
+		})
+
+		local cmp = require("cmp")
+		cmp.setup({
+			sources = {
+				{ name = "cmp_nvim_lsp" },
+				{ name = "buffer" },
+			},
+			mapping = {
+				["<TAB>"] = cmp.mapping.confirm({ select = true }),
 			},
 		})
 	end,
