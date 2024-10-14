@@ -4,7 +4,7 @@ configDir="$HOME/.config"
 
 dirList=("$configDir/i3" "$configDir/kitty" "$HOME/.zshrc"
 	"$configDir/i3blocks" "$configDir/nvim"
-	"$HOME/.local/share/scripts" "$configDir/tmux/tmux.conf"
+	"$HOME/.local/scripts" "$configDir/tmux/tmux.conf"
 	)
 
 syncConfigs(){

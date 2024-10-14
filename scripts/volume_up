@@ -4,5 +4,5 @@ volume=$(pactl get-sink-volume 0  | grep -o  '[0-9]\+%' -m 1 | grep -o '[0-9]\+'
 )
 
 volume=$((volume + 5))
-volume=$((volume > 100 ? 100 : volume))
+volume=$((volume > 100? 100: volume))
 pactl set-sink-volume  0 ${volume}%

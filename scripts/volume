@@ -6,11 +6,11 @@ volume_info=$(amixer sget Master)
 volume_status=$(echo "${volume_info}" | grep -wo "on\|off" | head -n 1)
 
 if [[ "${volume_status}" = "off" ]]; then
-    echo "🎧Mute"
-    echo "🎧Mute"
+    echo "🎧 Mute"
+    echo "🎧 Mute"
     echo "#fffc00"
 else
-    echo "🎧${volume}%"
-    echo "🎧${volume}%"
+    echo "🎧 ${volume}%"
+    echo "🎧 ${volume}%"
 
 fi
