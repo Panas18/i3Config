@@ -1,5 +1,6 @@
 return { -- Autoformat
 	"stevearc/conform.nvim",
+	branch = "master",
 	event = { "BufWritePre" },
 	cmd = { "ConformInfo" },
 	keys = {
@@ -15,31 +16,64 @@ return { -- Autoformat
 	opts = {
 		notify_on_error = false,
 		format_on_save = function(bufnr)
-			-- Disable "format_on_save lsp_fallback" for languages that don't
-			-- have a well standardized coding style. You can add additional
-			-- languages here or re-enable it for the disabled ones.
-			local disable_filetypes = { c = true, cpp = true }
-			local lsp_format_opt
-			if disable_filetypes[vim.bo[bufnr].filetype] then
-				lsp_format_opt = "never"
-			else
-				lsp_format_opt = "fallback"
-			end
+			local disable_filetypes = {}
+			local lsp_format_opt = disable_filetypes[vim.bo[bufnr].filetype] and "never" or "fallback"
 			return {
 				timeout_ms = 500,
 				lsp_format = lsp_format_opt,
 			}
 		end,
 		formatters_by_ft = {
+			-- Maintain all original language configurations
 			lua = { "stylua" },
-			-- Conform will run multiple formatters sequentially
 			python = { "isort", "black" },
-			-- Use a sub-list to run only the first available formatter
-			javascript = { { "eslint" }, { "prettierd", "prettier" } },
-			typescript = { { "eslint" }, { "prettierd", "prettier" } },
-			json = { { "prettier" } },
-			c = { { "clang-format" } },
-			cpp = { { "clang-format" } },
+			javascript = {
+				stop_after_first = true,
+				"eslint",
+				"prettierd",
+				"prettier",
+			},
+			typescript = {
+				stop_after_first = true,
+				"eslint",
+				"prettierd",
+				"prettier",
+			},
+			typescriptreact = {
+				stop_after_first = true,
+				"eslint",
+				"prettierd",
+				"prettier",
+			},
+			json = { "jq", "prettierd", "prettier" },
+			jsonc = { "prettierd", "prettier" },
+
+			-- Enhanced C/C++ configuration
+			c = { "clang-format" },
+			cpp = { "clang-format" },
+		},
+		formatters = {
+			-- Add clang-format configuration while preserving existing formatters
+			["clang-format"] = {
+				command = "clang-format",
+				args = {
+					"--style=file",
+					"--fallback-style=llvm",
+					"-assume-filename=$FILENAME",
+				},
+				cwd = require("conform.util").root_file({
+					".clang-format",
+					".clang-format.yaml",
+					".clang-format.yml",
+				}),
+			},
 		},
 	},
+	config = function(_, opts)
+		-- Ensure clang-format is installed via Mason
+		require("mason-tool-installer").setup({
+			ensure_installed = { "clang-format" },
+		})
+		require("conform").setup(opts)
+	end,
 }

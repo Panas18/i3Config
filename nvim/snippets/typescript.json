@@ -1,0 +1,7 @@
+{
+  "Console log JSON.stringify": {
+    "prefix": ["clstr"],
+    "body": "console.log(JSON.stringify(${1:fuubar}, null, 2));$0",
+    "description": "Logs a stringified version of an object with indentation."
+  }
+}

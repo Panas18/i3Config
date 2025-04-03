@@ -98,11 +98,12 @@ vim.g.have_nerd_font = true
 
 -- Make line numbers default
 vim.opt.number = true
+vim.opt.colorcolumn = "80,120"
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it! vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
-vim.opt.mouse = "a"
+vim.opt.mouse:remove("a")
 vim.opt.relativenumber = true
 
 -- Don't show the mode, since it's already in the status line
@@ -146,7 +147,8 @@ vim.opt.splitbelow = true
 -- vim.opt.list = true
 -- vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 vim.opt.tabstop = 2
-
+vim.opt.softtabstop = 2
+vim.opt.shiftwidth = 2
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = "split"
 
@@ -173,12 +175,6 @@ vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagn
 -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
-
--- TIP: Disable arrow keys in normal mode
--- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -356,6 +352,7 @@ require("lazy").setup({
 		end,
 	},
 
+	{ "rafamadriz/friendly-snippets" },
 	-- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
 	-- init.lua. If you want these files, they are in the repository, so you can just download them and
 	-- place them in the correct locations.
@@ -398,6 +395,17 @@ require("lazy").setup({
 			lazy = "💤 ",
 		},
 	},
+})
+local client = vim.lsp.start({
+	name = "DJLSP",
+	cmd = { "npx", "ts-node", "./lsp/phi-lsp/src/index.ts" },
+	on_init = function(client, init_result)
+		vim.api.nvim_create_autocmd("FileType", {
+			callback = function()
+				vim.lsp.buf_attach_client(0, client.id)
+			end,
+		})
+	end,
 })
 
 -- The line beneath this is called `modeline`. See `:help modeline`

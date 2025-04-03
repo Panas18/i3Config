@@ -6,7 +6,7 @@ return {
 		"nvim-lua/plenary.nvim",
 		"nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
 		"MunifTanjim/nui.nvim",
-		"3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
+		-- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
 		{
 			"s1n7ax/nvim-window-picker",
 			version = "2.*",
@@ -128,7 +128,7 @@ return {
 			commands = {},
 			window = {
 				position = "right",
-				width = 40,
+				width = 60,
 				auto_expand_width = true,
 				mapping_options = {
 					noremap = true,
