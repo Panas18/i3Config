@@ -1,0 +1,67 @@
+#!/bin/bash
+
+case $1 in
+"billingExecutor")
+	SESSION_NAME="billingExecutor"
+	DIRECTORY="${HOME}/Code/lf/signetic/billing/billing-exec-new/"
+	;;
+"plugin")
+	SESSION_NAME="plugin"
+	DIRECTORY="${HOME}/Code/lf/signetic/billing/mvs-dynamics"
+	;;
+"pubcon")
+	SESSION_NAME="pubcon"
+	DIRECTORY="${HOME}/Code/lf/signetic/platform/PubCon/"
+	;;
+"pcf")
+	SESSION_NAME="pcf"
+	DIRECTORY="${HOME}/Code/lf/signetic/platform/signetic-pcf"
+	;;
+"ncpdp")
+	SESSION_NAME="ncpdp"
+	DIRECTORY="${HOME}/Code/lf/signetic/billing/billing-exec-new/"
+	;;
+*)
+	SESSION_NAME="default"
+	DIRECTORY="${HOME}"
+	;;
+esac
+
+if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+	if [ -n "$TMUX" ]; then
+		tmux switch-client -t "$SESSION_NAME"
+	else
+		tmux attach-session -t "$SESSION_NAME"
+	fi
+else
+	# Create the new session
+	if [ "$SESSION_NAME" = "ncpdp" ]; then
+		tmux new-session -d -s "$SESSION_NAME" -c "$DIRECTORY" "nvim ."
+		tmux new-window -t "$SESSION_NAME" -c "$DIRECTORY"
+		tmux new-window -t "$SESSION_NAME" -c "$DIRECTORY"
+		tmux new-window -t "$SESSION_NAME" -c "$DIRECTORY"
+
+		tmux rename-window -t "$SESSION_NAME:1" "ncpdpProcessor"
+		tmux rename-window -t "$SESSION_NAME:2" "ncpdplistner"
+		tmux rename-window -t "$SESSION_NAME:3" "eligibility"
+		tmux rename-window -t "$SESSION_NAME:4" "zsh"
+
+		tmux select-window -t "$SESSION_NAME:1"
+	else
+		tmux new-session -d -s "$SESSION_NAME" -c "$DIRECTORY" "nvim ."
+		tmux new-window -t "$SESSION_NAME" -c "$DIRECTORY"
+
+		tmux rename-window -t "$SESSION_NAME:1" "vim"
+		tmux rename-window -t "$SESSION_NAME:2" "terminal"
+
+		tmux select-window -t "$SESSION_NAME:1"
+	fi
+
+	# If inside a tmux session, switch to the new session
+	if [ -n "$TMUX" ]; then
+		tmux switch-client -t "$SESSION_NAME"
+	else
+		# If not inside a tmux session, attach to the new session
+		tmux attach-session -t "$SESSION_NAME"
+	fi
+fi

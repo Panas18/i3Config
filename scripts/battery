@@ -42,8 +42,8 @@ if [[ "${BATTERY_POWER}" -le "${URGENT_VALUE}"  &&  "${BATTERY_STATE}" = "Discha
 fi
 
 
-if [ "${BATTERY_STATE}" = "Not charging" ]; then
-  notify-send "☢️ Battery Not Charging!!!! Warning" 
-  echo "$BATTERY_POWER % NOT CHARGING"	
-  exit 33
-fi
+# if [ "${BATTERY_STATE}" = "Not charging" ]; then
+#   notify-send "☢️ Battery Not Charging!!!! Warning" 
+#   echo "$BATTERY_POWER % NOT CHARGING"	
+#   exit 33
+# fi

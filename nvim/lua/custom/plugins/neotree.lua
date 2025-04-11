@@ -196,14 +196,14 @@ return {
 					hide_gitignored = true,
 					hide_hidden = true, -- only works on Windows for hidden files/directories
 					hide_by_name = {
-						--"node_modules"
+						"node_modules",
 					},
 					hide_by_pattern = { -- uses glob style patterns
 						--"*.meta",
 						--"*/src/*/tsconfig.json",
 					},
 					always_show = { -- remains visible even if other settings would normally hide it
-						--".gitignored",
+						".gitignored",
 					},
 					never_show = { -- remains hidden even if visible is toggled to true, this overrides always_show
 						--".DS_Store",
@@ -231,8 +231,8 @@ return {
 						["<bs>"] = "navigate_up",
 						["."] = "set_root",
 						["H"] = "toggle_hidden",
-						["/"] = "fuzzy_finder",
-						["D"] = "fuzzy_finder_directory",
+						["D"] = "fuzzy_finder",
+						["/"] = "fuzzy_finder_directory",
 						["#"] = "fuzzy_sorter", -- fuzzy sorting using the fzy algorithm
 						-- ["D"] = "fuzzy_sorter_directory",
 						["f"] = "filter_on_submit",

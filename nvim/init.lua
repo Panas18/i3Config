@@ -166,7 +166,10 @@ vim.opt.scrolloff = 10
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 -- Diagnostic keymaps
-vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+vim.keymap.set("n", "<leader>l", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+vim.keymap.set("n", "<leader>q", function(_ev)
+	vim.diagnostic.open_float({ source = true, severity_sort = true, border = "rounded", focusable = false })
+end)
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -362,7 +365,7 @@ require("lazy").setup({
 	--  Here are some example plugins that I've included in the Kickstart repository.
 	--  Uncomment any of the lines below to enable them (you will need to restart nvim).
 	--
-	-- require("kickstart.plugins.debug"),
+	require("kickstart.plugins.debug"),
 	require("kickstart.plugins.indent_line"),
 	require("kickstart.plugins.lint"),
 	require("kickstart.plugins.autopairs"),
@@ -396,17 +399,25 @@ require("lazy").setup({
 		},
 	},
 })
-local client = vim.lsp.start({
-	name = "DJLSP",
-	cmd = { "npx", "ts-node", "./lsp/phi-lsp/src/index.ts" },
-	on_init = function(client, init_result)
-		vim.api.nvim_create_autocmd("FileType", {
-			callback = function()
-				vim.lsp.buf_attach_client(0, client.id)
-			end,
-		})
-	end,
-})
 
--- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et
+-- local clientId = vim.lsp.start({
+-- 	name = "DJLSP",
+-- 	cmd = { "npx", "ts-node", "/home/panas.tiwari/.config/nvim/lsp/phi-lsp/src/index.ts" },
+-- 	on_init = function(client, init_result)
+-- 		-- vim.notify('DJLSP started', vim.log.levels.INFO, { title = 'LSP' })
+-- 		for _, buf in pairs(vim.api.nvim_list_bufs()) do
+-- 			if vim.bo[buf].filetype then
+-- 				if vim.api.nvim_buf_is_loaded(buf) then
+-- 					vim.lsp.buf_attach_client(buf, client.id)
+-- 				end
+-- 			end
+-- 		end
+-- 		vim.api.nvim_create_autocmd("FileType", {
+-- 			pattern = "*",
+-- 			group = vim.api.nvim_create_augroup("phiLsp", { clear = true }),
+-- 			callback = function()
+-- 				vim.lsp.buf_attach_client(0, client.id)
+-- 			end,
+-- 		})
+-- 	end,
+-- })

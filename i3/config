@@ -1,5 +1,6 @@
 # i3 config file (v4) Please see http://i3wm.org/docs/userguide.html for a complete reference!
 
+
 # Set mod key (Mod1=<Alt>, Mod4=<Super>)
 set $mod Mod4
 set $mod1 Mod1
@@ -29,7 +30,7 @@ floating_modifier $mod
 
 # start a terminal
 
-bindsym $mod+Return exec xfce4-terminal
+bindsym $mod+Return exec kitty
 bindsym $mod+Shift+q kill
 
 # start program launcher
@@ -138,8 +139,8 @@ bindsym $mod+Shift+minus move scratchpad
 bindsym $mod+minus scratchpad show
 
 #navigate workspaces next / previous
-bindsym $mod+Ctrl+Right workspace next
-bindsym $mod+Ctrl+Left workspace prev
+# bindsym $mod+Ctrl+Right workspace next
+# bindsym $mod+Ctrl+Left workspace prev
 
 # Workspace names
 # to display names or symbols instead of plain workspace numbers you can use
@@ -193,10 +194,16 @@ bindsym $mod+Shift+9 move container to workspace $ws9;
 bindsym $mod+Shift+0 move container to workspace $ws10;
 
 ## Move workspace to monitor
-bindsym $mod1+Ctrl+l move workspace to output left;
-bindsym $mod1+Ctrl+h move workspace to output right;
-bindsym $mod1+Ctrl+j move workspace to output down;
-bindsym $mod1+Ctrl+k move workspace to output up;
+bindsym $mod+Ctrl+l move workspace to output left;
+bindsym $mod+Ctrl+h move workspace to output right;
+bindsym $mod+Ctrl+j move workspace to output down;
+bindsym $mod+Ctrl+k move workspace to output up;
+
+
+bindsym $mod+Ctrl+Rjght move workspace to output left;
+bindsym $mod+Ctrl+Left move workspace to output right;
+bindsym $mod+Ctrl+Down move workspace to output down;
+bindsym $mod+Ctrl+Up move workspace to output up;
 
 # Open applications on specific workspaces
 #assign [class="firefox"] $ws2
@@ -275,9 +282,11 @@ mode "resize" {
 #bindsym $mod+9 exec --no-startup-id blurlock
 
 # Autostart applications
+exec_always --no-startup-id pactl load-module module-switch-on-connect && exec_always --no-startup-id pactl load-module module-switch-on-port-available
 exec_always xmodmap ~/.Xmodmap_shift
 exec_always ~/.local/scripts/enable_touch
 exec_always xrandr --auto
+
 # exec_always blueman-applet
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec --no-startup-id nitrogen --restore
@@ -285,6 +294,7 @@ exec --no-startup-id nm-applet
 exec --no-startup-id xfce4-power-manager
 exec --no-startup-id clipit
 exec --no-startup-id xautolock -time 1 -locker blurlock
+exec_always --no-startup-id xset r rate 500 30
 
 set_from_resource $term_background background
 set_from_resource $term_foreground foreground
@@ -324,7 +334,7 @@ client.background       #ffffff
 # finds out, if available)
 
 bar {
-position top 
+position top
 #height 50px
 status_command i3blocks -c ~/.config/i3blocks/config
 colors {
@@ -340,8 +350,8 @@ colors {
 
 
 ######my command ############
-bindsym $mod+b exec chromium-browser 
-bindsym $mod+t exec thunar 
+bindsym $mod+b exec brave-browser 
+bindsym $mod+t exec nautilus 
 bindsym $mod+m exec spotify
 bindsym $mod+p exec code
 bindsym --release $mod+d exec xkill
@@ -360,9 +370,7 @@ bindsym  $mod1+Shift+j exec playerctl previous
 #PowerKeys
 bindsym $mod+Ctrl+Delete exec shutdown now
 bindsym $mod+Ctrl+BackSpace exec reboot
-bindsym $mod+Ctrl+Print exec systemctl suspend; exec i3lock -i ~/Pictures/Wallpapers/pexels-roberto-nickson-2647990.png
-bindsym $mod+Ctrl+s exec systemctl suspend; exec i3lock -i ~/Pictures/Wallpapers/pexels-roberto-nickson-2647990.png
-bindsym $mod+Ctrl+l exec i3lock -i ~/Pictures/Wallpapers/pexels-roberto-nickson-2647990.png
+bindsym $mod+Ctrl+Print exec  ~/.local/scripts/pauseAllAudio.sh; exec systemctl suspend; exec i3lock  -f -i ~/Pictures/Wallpapers/pexels-roberto-nickson-2647990.png
 
 
 # key bindings for my keyboard

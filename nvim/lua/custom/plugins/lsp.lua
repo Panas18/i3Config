@@ -18,7 +18,7 @@ return { -- LSP Configuration & Plugins
 		{ "j-hui/fidget.nvim", opts = {} },
 
 		-- Lua LSP configuration
-		{ "folke/neodev.nvim", opts = {} },
+		{ "folke/neodev.nvim", opts = { enabled = false } },
 	},
 	config = function()
 		vim.api.nvim_create_autocmd("LspAttach", {
@@ -39,7 +39,14 @@ return { -- LSP Configuration & Plugins
 
 				-- Find references for the word under your cursor.
 				map("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
-
+				map("<leader>q", function(ev)
+					vim.diagnostic.open_float({
+						source = true,
+						severity_sort = true,
+						border = "rounded",
+						focusable = false,
+					})
+				end, "[E]rrors")
 				-- Jump to the implementation of the word under your cursor.
 				--  Useful when your language has ways of declaring types without an actual implementation.
 				map("gI", require("telescope.builtin").lsp_implementations, "[G]oto [I]mplementation")
@@ -132,6 +139,14 @@ return { -- LSP Configuration & Plugins
 					"--completion-style=detailed",
 					"--function-arg-placeholders",
 					"--fallback-style=llvm",
+					-- Add this line to disable the typecheck comparison warning
+					"--index-file=-Wstring-compare",
+				},
+				init_options = {
+					-- Alternative approach through init_options if the cmd approach doesn't work
+					diagnostics = {
+						disable = { "typecheck_comparison_of_pointer_integer" },
+					},
 				},
 			},
 			omnisharp = {
