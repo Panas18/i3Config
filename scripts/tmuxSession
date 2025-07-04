@@ -15,7 +15,7 @@ case $1 in
 	;;
 "pcf")
 	SESSION_NAME="pcf"
-	DIRECTORY="${HOME}/Code/lf/signetic/platform/signetic-pcf"
+	DIRECTORY="${HOME}/Code/lf/signetic/feature/signetic-pcf/"
 	;;
 "ncpdp")
 	SESSION_NAME="ncpdp"

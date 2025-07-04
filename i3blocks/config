@@ -49,7 +49,7 @@ command=~/.local/scripts/volume
 command=~/.local/scripts/memory
 separator=true
 interval=1
-label=
+label=  
 
 
 # Disk usage
@@ -62,13 +62,13 @@ label=
 [disk]
 command=~/.local/scripts/disk
 interval=5
-label=
+label=  
 
 #Cpu usages
 [cpu_usages]
 command=~/.local/scripts/cpu_usages
 interval=2
-label=
+label=  
 
 
 [battery]
@@ -97,4 +97,4 @@ markup=pango
 [temperature]
 interval=1
 command=~/.local/scripts/temperature
-label=
+label= 

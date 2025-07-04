@@ -10,24 +10,24 @@ URGENT_VALUE=20
 function return_battery_info(){
 
   if [[ "${BATTERY_POWER}" = "100" ]]; then
-    message="  100% ${BATTERY_TIME}"
+    message="   100% ${BATTERY_TIME}"
   elif [ "${BATTERY_POWER}" -lt "100" ] && [ "${BATTERY_POWER}" -ge "80" ]; then
-    message=" ${BATTERY_POWER}%  ${BATTERY_TIME} Hr"
+    message="   ${BATTERY_POWER}%  ${BATTERY_TIME} Hr"
   elif [ "${BATTERY_POWER}" -lt "80" ] && [ "${BATTERY_POWER}" -ge "60" ]; then
-    message=" ${BATTERY_POWER}%  ${BATTERY_TIME} Hr"
+    message="   ${BATTERY_POWER}%  ${BATTERY_TIME} Hr"
   elif [ "${BATTERY_POWER}" -lt "60" ] && [ "${BATTERY_POWER}" -ge "40" ]; then
-    message=" ${BATTERY_POWER}%  ${BATTERY_TIME} Hr"
+    message="   ${BATTERY_POWER}%  ${BATTERY_TIME} Hr"
   elif [ "${BATTERY_POWER}" -lt "40" ] && [ "${BATTERY_POWER}" -ge "20" ]; then
-    message=" ${BATTERY_POWER}%  ${BATTERY_TIME} Hr"
+    message="   ${BATTERY_POWER}%  ${BATTERY_TIME} Hr"
   elif [ "${BATTERY_POWER}" -lt "20" ]; then
-    message=" ${BATTERY_POWER}%  ${BATTERY_TIME} Hr"
+    message="   ${BATTERY_POWER}%  ${BATTERY_TIME} Hr"
   fi
 }
 
 
 if [[ "${BATTERY_STATE}" = "Charging" || "${BATTERY_STATE}" = "Full" ]]; then
   return_battery_info
-  echo "  $message"
+  echo " $message"
 fi
 
 

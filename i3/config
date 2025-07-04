@@ -8,8 +8,8 @@ set $mod1 Mod1
 # set default desktop layout (default is tiling)
 # workspace_layout tabbed <stacking|tabbed>
 # Configure border style <normal|1pixel|pixel xx|none|pixel>
-default_border pixel 4
-default_floating_border normal
+default_border pixel 1
+default_floating_border pixel
 
 set $border none
 
@@ -30,15 +30,15 @@ floating_modifier $mod
 
 # start a terminal
 
-bindsym $mod+Return exec kitty
+bindsym $mod+Return exec $HOME/.local/kitty.app/bin/kitty
 bindsym $mod+Shift+q kill
 
 # start program launcher
-bindsym $mod+space exec rofi -show drun
-bindsym $mod+Tab exec rofi -show window
+bindsym $mod+space exec rofi -show drun -font "FiraCode Nerd Font 12"
+bindsym $mod+Tab exec rofi -show window -font "FiraCode Nerd Font 12"
 
 # launch categorized menu
-bindsym $mod+z exec --no-startup-id morc_menu
+# bindsym $mod+z exec --no-startup-id morc_menu
 
 ################################################################################################
 ## smund-section - DO NOT EDIT if you wish to automatically upgrade Alsa -> Pulseaudio later! ##
@@ -70,9 +70,12 @@ bindsym XF86MonBrightnessDown exec xbacklight -dec 10  && pkill -SIGRTMIN+10 i3b
 bindsym $mod+Ctrl+b exec terminal -e 'bmenu'
 bindsym $mod+F5 exec terminal -e 'mocp'
 
-bindsym $mod+Print --release exec --no-startup-id maim | tee ~/Pictures/Screenshots/$(date --iso-8601=seconds).png | xclip -selection clipboard -t image/png
+# bindsym $mod+Print --release exec --no-startup-id maim | tee ~/Pictures/Screenshots/$(date --iso-8601=seconds).png | xclip -selection clipboard -t image/png
+#
+# bindsym Shift+Print --release exec --no-startup-id maim -s | tee ~/Pictures/Screenshots/$(date --iso-8601=seconds).png | xclip -selection clipboard -t image/png
 
-bindsym Shift+Print --release exec --no-startup-id maim -s | tee ~/Pictures/Screenshots/$(date --iso-8601=seconds).png | xclip -selection clipboard -t image/png
+bindsym Print  exec --no-startup-id flameshot gui -c -p ~/Pictures/Screenshots/
+bindsym Shift+Print  exec --no-startup-id flameshot full -c -p ~/Pictures/Screenshots/
  
 
 focus_follows_mouse no
@@ -103,7 +106,8 @@ bindsym $mod+Shift+Right move right
 
 # workspace back and forth (with/without active container)
 #workspace_auto_back_and_forth yes
-bindsym Mod1+Tab workspace back_and_forth
+bindsym $mod1+Tab workspace back_and_forth
+
 bindsym $mod+Shift+b move container to workspace back_and_forth; workspace back_and_forth
 
 # split orientation
@@ -115,7 +119,7 @@ bindsym $mod+q split toggle
 bindsym $mod+f fullscreen toggle
 
 # change container layout (stacked, tabbed, toggle split)
-bindsym $mod+s layout stacking
+# bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
 
@@ -146,16 +150,16 @@ bindsym $mod+minus scratchpad show
 # to display names or symbols instead of plain workspace numbers you can use
 # something like: set $ws1 1:mail
 #                 set $ws2 2:
-set $ws1 "1: "
-set $ws2 "2: "
-set $ws3 "3: "
-set $ws4 "4: "
-set $ws5 "5: "
-set $ws6 "6: "
-set $ws7 "7: "
-set $ws8 "8: "
-set $ws9 "9: "
-set $ws10 "10: "
+set $ws1 "1:  "
+set $ws2 "2:  "
+set $ws3 "3:  "
+set $ws4 "4:  "
+set $ws5 "5:  "
+set $ws6 "6:  "
+set $ws7 "7:  "
+set $ws8 "8:  "
+set $ws9 "9:  "
+set $ws10 "10:  "
 
 # switch to workspace
 bindsym $mod+1 workspace  $ws1
@@ -287,6 +291,8 @@ exec_always xmodmap ~/.Xmodmap_shift
 exec_always ~/.local/scripts/enable_touch
 exec_always xrandr --auto
 
+exec_always set-hdmi-mode.sh
+
 # exec_always blueman-applet
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec --no-startup-id nitrogen --restore
@@ -334,23 +340,32 @@ client.background       #ffffff
 # finds out, if available)
 
 bar {
-position top
-#height 50px
-status_command i3blocks -c ~/.config/i3blocks/config
-colors {
-         background $bg-colorx
-                separator #757575
-                #                  border             background         text
-                focused_workspace  $bg-color          $bg-color          $text-color
-                inactive_workspace $inactive-bg-color $inactive-bg-color $inactive-text-color
-                urgent_workspace   $urgent-bg-color   $urgent-bg-color   $text-color
+    # mode hide
+    hidden_state hide
+    modifier Mod1
+    position top
+    status_command i3blocks -c ~/.config/i3blocks/config
+    i3bar_command i3bar --transparency
 
-	}
+    font pango:FiraCode Nerd Font 12
+
+    colors {
+        background          #1e1e2e
+        statusline          #cdd6f4
+        separator           #585b70
+
+        #                      border       background   text
+        focused_workspace     #89b4fa       #313244       #ffffff
+        inactive_workspace    #1e1e2e       #1e1e2e       #6c7086
+        urgent_workspace      #f38ba8       #f38ba8       #1e1e2e
+        binding_mode          #f9e2af       #f9e2af       #1e1e2e
+    }
 }
 
 
 ######my command ############
-bindsym $mod+b exec brave-browser 
+## bindsym $mod+b exec brave-browser 
+bindsym $mod+b exec zen -P
 bindsym $mod+t exec nautilus 
 bindsym $mod+m exec spotify
 bindsym $mod+p exec code
@@ -358,6 +373,7 @@ bindsym --release $mod+d exec xkill
 bindsym  $mod+y exec xfce4-terminal -e "ranger"
 bindsym $mod+c exec rofi -show calc -modi calc -no-show-match -no-sort
 bindsym $mod+Shift+c exec rofi -show emoji -modi emoji -no-show-match -no-sort
+exec --no-startup-id flameshot
 
 #### player keys########
 bindsym  XF86AudioPlay exec playerctl play-pause
@@ -381,4 +397,6 @@ bindsym $mod1+m exec --no-startup-id pactl set-sink-mute 0 toggle && pkill -SIGR
 
 bindsym $mod1+p exec xbacklight -inc 10 && pkill -SIGRTMIN+10 i3blocks
 bindsym $mod1+o exec xbacklight -dec 10  && pkill -SIGRTMIN+10 i3blocks
+
+# popup_during_fullscreen smart
 
