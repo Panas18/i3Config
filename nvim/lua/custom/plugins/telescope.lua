@@ -60,6 +60,15 @@ return { -- Fuzzy Finder (files, lsp, etc)
 					i = { ["<c-enter>"] = "to_fuzzy_refine" },
 				},
 				path_display = { "smart" }, -- Smart path display
+				file_ignore_patterns = {
+					"node_modules",
+					"dist",
+					"build",
+					".git",
+				},
+				preview = {
+					treesitter = false, -- Disable treesitter preview to avoid ft_to_lang error
+				},
 			},
 			-- pickers = {}
 			extensions = {

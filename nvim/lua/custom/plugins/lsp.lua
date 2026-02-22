@@ -8,6 +8,8 @@ return { -- LSP Configuration & Plugins
 				ensure_installed = {
 					"clangd", -- C/C++ LSP
 					"clang-format",
+					"ts_ls", -- TypeScript/JavaScript LSP
+					"eslint", -- ESLint
 				},
 			},
 		},
@@ -118,7 +120,8 @@ return { -- LSP Configuration & Plugins
 
 		-- Configure language servers
 		local servers = {
-			["eslint-lsp"] = {},
+			["eslint"] = {},
+			["ts_ls"] = {},
 			lua_ls = {
 				settings = {
 					Lua = {

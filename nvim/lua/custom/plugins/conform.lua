@@ -61,11 +61,6 @@ return { -- Autoformat
 					"--fallback-style=llvm",
 					"-assume-filename=$FILENAME",
 				},
-				cwd = require("conform.util").root_file({
-					".clang-format",
-					".clang-format.yaml",
-					".clang-format.yml",
-				}),
 			},
 		},
 	},
