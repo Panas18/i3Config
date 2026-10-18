@@ -1,5 +1,0 @@
-#!/bin/bash
-
-light -U 5 
-brightness=$(light)
-pkill -SIGRTMIN+10 i3blocks

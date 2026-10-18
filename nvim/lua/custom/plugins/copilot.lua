@@ -13,8 +13,8 @@ return {
 			markdown = true,
 		}
 
-		-- Accept Copilot suggestion with Tab
-		vim.keymap.set("i", "<Tab>", "copilot#Accept()", {
+		-- Alt+l accepts AI suggestions; Tab remains available for normal completion.
+		vim.keymap.set("i", "<M-l>", "copilot#Accept()", {
 			expr = true,
 			replace_keycodes = false,
 			silent = true,

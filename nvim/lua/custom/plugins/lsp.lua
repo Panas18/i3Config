@@ -109,7 +109,7 @@ return { -- LSP Configuration & Plugins
 				-- This may be unwanted, since they displace some of your code
 				if client and client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
 					map("<leader>th", function()
-						vim.lsp.inlay_hint.enable(0, not vim.lsp.inlay_hint.is_enabled())
+						vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }), { bufnr = event.buf })
 					end, "[T]oggle Inlay [H]ints")
 				end
 			end,
@@ -143,7 +143,6 @@ return { -- LSP Configuration & Plugins
 					"--function-arg-placeholders",
 					"--fallback-style=llvm",
 					-- Add this line to disable the typecheck comparison warning
-					"--index-file=-Wstring-compare",
 				},
 				init_options = {
 					-- Alternative approach through init_options if the cmd approach doesn't work
@@ -165,20 +164,21 @@ return { -- LSP Configuration & Plugins
 
 		require("mason").setup()
 		require("mason-tool-installer").setup({
-			ensure_installed = vim.tbl_keys(servers),
+            run_on_start = false,
+			ensure_installed = {
+                "ts_ls", "eslint", "lua_ls", "omnisharp", "stylua", "prettier", "black", "isort", "delve",
+                -- Ubuntu provides these binaries; avoid downloading duplicate archives.
+                { "clangd", condition = function() return vim.fn.executable("/usr/bin/clangd") == 0 end },
+                { "clang-format", condition = function() return vim.fn.executable("/usr/bin/clang-format") == 0 end },
+            },
 		})
 
-		require("mason-lspconfig").setup({
-			handlers = {
-				function(server_name)
-					local server = servers[server_name] or {}
-					-- This handles overriding only values explicitly passed
-					-- by the server configuration above. Useful when disabling
-					-- certain features of an LSP (for example, turning off formatting for tsserver)
-					server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-					require("lspconfig")[server_name].setup(server)
-				end,
-			},
-		})
+		-- mason-lspconfig v2 uses Neovim 0.11's native configuration API.
+		for server_name, server in pairs(servers) do
+			server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
+			vim.lsp.config(server_name, server)
+            vim.lsp.enable(server_name)
+		end
+		require("mason-lspconfig").setup({ automatic_enable = true })
 	end,
 }
