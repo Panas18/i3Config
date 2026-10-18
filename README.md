@@ -28,7 +28,8 @@ The configuration inherits your PATH instead of replacing it with fixed paths.
 
 The shared editor configuration and Treesitter pins target Neovim 0.11. Use
 `:Lazy restore` for locked plugins and `:MasonToolsInstall` for configured language
-tools. Go is needed to build the configured Go debugger. The parser list is in
+tools, including Markdown linting. Missing optional linters are skipped rather
+than aborting file opening. Go is needed to build the configured Go debugger. The parser list is in
 `nvim/parsers.lua`; missing parsers install through Treesitter. Check compatibility
 before changing the Neovim version or plugin pins.
 
