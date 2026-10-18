@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+"""Local wallpaper picker with cached, low-resolution image previews."""
+
+import hashlib
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+from PIL import Image, ImageOps
+
+THEME = """
+window { width: 90%; height: 85%; }
+mainbox { padding: 12px; spacing: 8px; }
+listview { columns: 4; lines: 3; fixed-height: false; spacing: 10px; }
+element { orientation: vertical; padding: 6px; spacing: 4px; }
+element-icon { size: 170px; horizontal-align: 0.5; }
+element-text { horizontal-align: 0.5; font: "Fira Code 10"; }
+"""
+
+
+def gallery_items():
+    cache = (
+        Path(os.environ.get("XDG_CACHE_HOME", str(Path.home() / ".cache")))
+        / "i3config/wallpaper-thumbnails"
+    )
+    cache.mkdir(parents=True, exist_ok=True)
+    items = []
+    seen = set()
+    for directory in (
+        Path.home() / "Pictures/Wallpapers",
+        Path("/usr/share/backgrounds"),
+    ):
+        if not directory.exists():
+            continue
+        for path in sorted(directory.rglob("*")):
+            if not path.is_file() or path.suffix.lower() not in (
+                ".png",
+                ".jpg",
+                ".jpeg",
+                ".webp",
+            ):
+                continue
+            path = path.resolve()
+            if path in seen:
+                continue
+            seen.add(path)
+            try:
+                stat = path.stat()
+                key = hashlib.sha256(
+                    os.fsencode(path) + f"{stat.st_mtime_ns}:{stat.st_size}".encode()
+                ).hexdigest()
+                thumbnail = cache / (key + ".png")
+                if not thumbnail.exists():
+                    with Image.open(path) as source:
+                        preview = ImageOps.exif_transpose(source)
+                        preview.thumbnail((280, 160), Image.Resampling.LANCZOS)
+                        preview.convert("RGB").save(thumbnail)
+                        preview.close()
+                label = (
+                    path.name.replace("\n", " ").replace("\r", " ").replace("\t", " ")
+                )
+                items.append((path, label, thumbnail))
+            except (OSError, ValueError, Image.DecompressionBombError) as exc:
+                print(f"Skipping unreadable wallpaper {path}: {exc}", file=sys.stderr)
+    return items
+
+
+def choose():
+    items = gallery_items()
+    if not items:
+        subprocess.run(
+            [
+                "notify-send",
+                "Wallpaper",
+                "No images found in ~/Pictures/Wallpapers or /usr/share/backgrounds",
+            ]
+        )
+        return None
+    rows = b"".join(
+        (label + "\0icon\x1f" + str(thumbnail) + "\n").encode()
+        for _, label, thumbnail in items
+    )
+    result = subprocess.run(
+        [
+            "rofi",
+            "-dmenu",
+            "-i",
+            "-show-icons",
+            "-format",
+            "i",
+            "-p",
+            "Wallpaper",
+            "-window-title",
+            "Wallpaper previews",
+            "-mesg",
+            "Select a preview and press Enter to apply · Esc to cancel",
+            "-theme-str",
+            THEME,
+        ],
+        input=rows,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        if result.returncode != 1 and result.stderr:
+            print(result.stderr.decode(errors="replace"), file=sys.stderr)
+        return None
+    try:
+        index = int(result.stdout.strip())
+        if 0 <= index < len(items):
+            return items[index][0]
+    except ValueError:
+        pass
+    return None
+
+
+def main():
+    state = (
+        Path(os.environ.get("XDG_STATE_HOME", str(Path.home() / ".local/state")))
+        / "i3config/wallpaper"
+    )
+    default = Path.home() / "Pictures/Wallpapers/default.png"
+    state.parent.mkdir(parents=True, exist_ok=True)
+    if len(sys.argv) > 1 and sys.argv[1] == "--choose":
+        image = choose()
+        if image is None:
+            return
+    elif len(sys.argv) > 1:
+        image = Path(sys.argv[1]).expanduser()
+    elif state.exists():
+        image = Path(state.read_text().strip())
+    else:
+        image = default
+    if not image.is_file():
+        image = default
+    subprocess.run(["feh", "--no-fehbg", "--bg-fill", str(image)], check=True)
+    state.write_text(str(image.resolve()) + "\n")
+    subprocess.run([str(Path.home() / ".local/bin/i3-lock"), "--prepare"])
+
+
+if __name__ == "__main__":
+    main()

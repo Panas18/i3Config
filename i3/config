@@ -259,6 +259,8 @@ mode "resize" {
 
 # Once per login; session output is kept in ~/.local/state/i3config/session.log.
 exec --no-startup-id ~/.local/bin/i3-session-start
+# Enable touchpad tap-to-click on login and configuration reload.
+exec_always --no-startup-id ~/.local/bin/i3-touchpad
 
 # Start i3bar to display a workspace bar (plus the system information i3status if available)
 set $bg-color 	         #2f343f

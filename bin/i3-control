@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Drop key-repeat events before starting Python while a change is in progress.
+if [[ ${1:-} == brightness-* ]]; then
+  exec 9>"${XDG_RUNTIME_DIR:-/run/user/$UID}/i3config-brightness-key.lock"
+  flock -n 9 || exit 0
+fi
+case "${1:-}" in
+ volume-up) wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+ ;;
+ volume-down) wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- ;;
+ mute) wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle ;;
+ mic-mute) wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle ;;
+ brightness-up) "$HOME/.local/bin/i3-brightness" +5 ;;
+ brightness-down) "$HOME/.local/bin/i3-brightness" -- -5 ;;
+ *) echo 'Unknown control' >&2; exit 2 ;;
+esac
+if [[ $1 == brightness-* ]]; then
+  pkill -u "$UID" -RTMIN+10 -x i3blocks || true
+fi
+if [[ $1 != brightness-* ]]; then pkill -u "$UID" -RTMIN+11 -x i3blocks || true; fi

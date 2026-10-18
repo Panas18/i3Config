@@ -3,14 +3,21 @@
 Configuration files for i3, i3blocks, Kitty, tmux, zsh and Neovim.
 The macOS terminal/editor configuration is on `macos`.
 
-This branch contains configuration only: no installers, utility scripts, test
-scripts, binaries or vendored plugins. The full setup is preserved locally on
-`codex/local-setup`, which is not pushed.
+This branch includes desktop configuration and the runtime helpers in `bin/`.
+Installers, test scripts, binaries and vendored plugins are not included.
 
-## Existing-machine dependencies
+## Desktop helpers
 
-The custom i3 features use runtime helpers already installed on this Ubuntu
-machine. Their implementations are intentionally excluded from this branch:
+Install the helpers at the paths used by the i3 configuration:
+
+```sh
+mkdir -p ~/.local/bin ~/.local/state/i3config
+install -m 755 bin/i3-* ~/.local/bin/
+```
+
+Run these commands from the repository root. The helpers require an i3 X11
+session; start the session normally so `XDG_SESSION_ID` identifies the login
+session used by the lock listener.
 
 | Installed command | Used for |
 | --- | --- |
@@ -20,11 +27,15 @@ machine. Their implementations are intentionally excluded from this branch:
 | `~/.local/bin/i3-wallpaper` | Thumbnail wallpaper selection and restoration |
 | `~/.local/bin/i3-lock` | Current wallpaper fitted to each display for i3lock |
 | `~/.local/bin/i3-power-menu` | Rofi lock, suspend, logout, restart and shutdown menu |
+| `~/.local/bin/i3-touchpad` | Enable libinput tap-to-click on login/reload |
 | `~/.local/bin/i3-displays` | Lid handling and external display layout |
 
-The systemd user service also needs `i3-displays`. These features are not
-self-contained in a fresh clone. Keep the installed helpers when applying these
-configs to this machine; provide equivalent helpers before using them elsewhere.
+After copying the configuration and service, run `systemctl --user daemon-reload`
+and log into i3. The session helper starts the display service and lock listener.
+Put personal wallpapers in `~/Pictures/Wallpapers`; the picker also includes
+`/usr/share/backgrounds`. A `default.png` in the personal wallpaper directory is
+the fallback when no saved wallpaper exists. Wallpaper choices and generated
+previews stay in the user's state/cache directories and are not tracked.
 
 ## File locations and packages
 
@@ -32,6 +43,7 @@ Back up existing files before manually copying configuration.
 
 | Repository | Home-directory target |
 | --- | --- |
+| `bin/i3-*` | `~/.local/bin/` (executable) |
 | `.zshrc` | `~/.zshrc` |
 | `i3/`, `i3blocks/`, `kitty/`, `tmux/`, `nvim/` | Corresponding directories in `~/.config/` |
 | `tmux/tmux.conf` | `~/.tmux.conf` for compatibility |
@@ -41,7 +53,9 @@ Required desktop packages include i3-wm, i3blocks, Kitty, tmux, zsh, feh, rofi,
 NetworkManager/nm-applet, Blueman/BlueZ, PipeWire/WirePlumber, pavucontrol,
 brightnessctl, dunst, picom, policykit-1-gnome, xss-lock/i3lock, playerctl,
 Flameshot, xclip, Fira Code and Noto Color Emoji. App shortcuts also use nautilus
-and ranger. Use an X11 i3 login session.
+and ranger. Helpers additionally need Python 3, Pillow (`python3-pil`),
+libX11/libXi, xrandr, xset, libnotify (`notify-send`), and systemd/logind.
+Use an X11 i3 login session.
 
 Zsh needs Oh My Zsh at `~/.oh-my-zsh` and the zsh-autosuggestions and
 zsh-syntax-highlighting custom plugins. Tmux needs TPM at `~/.tmux/plugins/tpm`;
@@ -84,6 +98,5 @@ Alt+l accepts a Copilot suggestion.
 
 The installed Ubuntu session passed i3 syntax validation, zsh interactive Tab and
 history-suggestion checks, all three tmux palettes, Neovim startup/parser checks
-and TypeScript LSP attachment. Runtime helpers were tested locally before being
-excluded from this config-only branch. macOS runtime behaviour needs validation
+and TypeScript LSP attachment. Runtime helpers are included in `bin/` and were tested locally. macOS runtime behaviour needs validation
 on a Mac.

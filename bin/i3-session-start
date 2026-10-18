@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -uo pipefail
+logdir="${XDG_STATE_HOME:-$HOME/.local/state}/i3config"
+mkdir -p "$logdir"
+exec >> "$logdir/session.log" 2>&1
+echo "Session started $(date -Is)"
+dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP
+start() { pgrep -u "$UID" -f "^$1( |$)" >/dev/null || "$@" & }
+systemctl --user start i3-displays.service
+start nm-applet
+start blueman-applet
+start dunst
+start picom --backend xrender
+start /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1
+start xss-lock --session="${XDG_SESSION_ID:?Missing login session}" --transfer-sleep-lock -- "$HOME/.local/bin/i3-lock"
+xset s 600 600
+xset dpms 0 0 900
+xset r rate 500 30
+"$HOME/.local/bin/i3-wallpaper"
+kitty &
+wait

@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+"""Local rofi session menu; destructive actions require confirmation."""
+
+import os
+import subprocess
+
+
+def menu(options, prompt):
+    result = subprocess.run(
+        [
+            "rofi",
+            "-dmenu",
+            "-i",
+            "-no-custom",
+            "-format",
+            "i",
+            "-p",
+            prompt,
+            "-selected-row",
+            "0",
+            "-theme-str",
+            "window { width: 420px; } listview { lines: 6; }",
+        ],
+        input="\n".join(options) + "\n",
+        text=True,
+        capture_output=True,
+    )
+    if result.returncode or not result.stdout.strip().isdigit():
+        return None
+    index = int(result.stdout.strip())
+    return index if index < len(options) else None
+
+
+def main():
+    actions = [
+        (
+            "🔒 Lock",
+            ["loginctl", "lock-session"]
+            + (
+                [os.environ["XDG_SESSION_ID"]]
+                if os.environ.get("XDG_SESSION_ID")
+                else []
+            ),
+        ),
+        ("💤 Suspend", ["systemctl", "suspend"]),
+        ("🚪 Log out", ["i3-msg", "exit"]),
+        ("🔄 Restart computer", ["systemctl", "reboot"]),
+        ("⏻ Shut down", ["systemctl", "poweroff"]),
+    ]
+    choice = menu([label for label, _ in actions], "Power")
+    if choice is None:
+        return
+    label, command = actions[choice]
+    if choice >= 2 and menu(["Cancel", "Confirm"], label) != 1:
+        return
+    result = subprocess.run(command)
+    if result.returncode:
+        subprocess.run(["notify-send", "Power menu", "Action failed: " + label])
+
+
+if __name__ == "__main__":
+    main()

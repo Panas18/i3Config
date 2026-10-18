@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""Control the visible screen: logind backlight or external X11 dimming."""
+import argparse
+import fcntl
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+
+parser = argparse.ArgumentParser()
+parser.add_argument('change', help='+5, -5 (percentage points), or an absolute percentage')
+args = parser.parse_args()
+lockdir = Path(os.environ.get('XDG_RUNTIME_DIR', f'/run/user/{os.getuid()}'))
+lock = (lockdir/'i3config-brightness.lock').open('w')
+try:
+    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+except BlockingIOError:
+    raise SystemExit(0)
+value = float(args.change)
+relative = args.change.startswith(('+', '-'))
+
+def run(*command):
+    return subprocess.run(command, capture_output=True, text=True, timeout=10)
+
+screens = []
+current_screen = None
+for line in run('xrandr', '--current', '--verbose').stdout.splitlines():
+    match = re.match(r'^(\S+) connected\b(.*)', line)
+    if match:
+        name, details = match.groups()
+        current_screen = {'name': name, 'active': bool(re.search(r'\d+x\d+\+[-\d]+\+[-\d]+', details)),
+                          'internal': name.startswith(('eDP', 'LVDS', 'DSI')), 'brightness': 1.0}
+        screens.append(current_screen)
+    elif line and not line.startswith((' ', '\t')):
+        current_screen = None
+    elif current_screen is not None and line.strip().startswith('Brightness:'):
+        current_screen['brightness'] = float(line.split(':', 1)[1])
+active = [screen for screen in screens if screen['active']]
+external_only = active and not any(screen['internal'] for screen in active)
+
+if external_only:
+    levels = []
+    for screen in active:
+        current = screen['brightness']*100
+        target = max(5, min(100, current+value if relative else value))
+        result = run('xrandr', '--current', '--output', screen['name'], '--brightness', str(target/100))
+        if result.returncode:
+            parser.exit(1, 'External brightness failed: '+result.stderr)
+        levels.append(target)
+    percent = round(sum(levels)/len(levels))
+    target_name = 'external'
+else:
+    devices = sorted(Path('/sys/class/backlight').glob('*'))
+    if not devices:
+        parser.exit(1, 'No supported backlight or active external display found.\n')
+    device = devices[0]
+    maximum = int((device/'max_brightness').read_text())
+    current = int((device/'brightness').read_text())
+    target = current+round(maximum*value/100) if relative else round(maximum*value/100)
+    target = max(max(1, round(maximum*.01)), min(maximum, target))
+    result = run('busctl', '--system', 'call', 'org.freedesktop.login1',
+        '/org/freedesktop/login1/session/auto', 'org.freedesktop.login1.Session',
+        'SetBrightness', 'ssu', 'backlight', device.name, str(target))
+    if result.returncode:
+        result = run('brightnessctl', '-d', device.name, 'set', str(target))
+    if result.returncode:
+        parser.exit(1, 'Backlight brightness failed: '+result.stderr)
+    percent = round(target/maximum*100)
+    target_name = 'backlight'
+state = Path(os.environ.get('XDG_STATE_HOME', str(Path.home()/'.local/state')))/'i3config'
+state.mkdir(parents=True, exist_ok=True)
+(state/'brightness-level.json').write_text(json.dumps({'percent': percent, 'target': target_name}))
+print(f'Brightness {percent}% ({target_name})')

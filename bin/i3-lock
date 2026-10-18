@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+"""Use the selected wallpaper on every active output, then exec i3lock."""
+import hashlib
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+from PIL import Image, ImageOps
+
+
+def prepare():
+    state = Path(os.environ.get('XDG_STATE_HOME', str(Path.home()/'.local/state')))/'i3config/wallpaper'
+    wallpaper = Path(state.read_text().strip()) if state.exists() else Path.home()/'Pictures/Wallpapers/default.png'
+    layout = subprocess.check_output(['xrandr', '--current'], text=True, timeout=5)
+    screen = re.search(r'current (\d+) x (\d+)', layout)
+    outputs = re.findall(r'^\S+ connected(?: primary)? (\d+)x(\d+)\+(-?\d+)\+(-?\d+)', layout, re.M)
+    if not screen or not outputs:
+        raise ValueError('Cannot determine active display geometry')
+    stat = wallpaper.stat()
+    key = hashlib.sha256(f'{wallpaper}:{stat.st_mtime_ns}:{stat.st_size}:{screen.groups()}:{outputs}'.encode()).hexdigest()
+    cache = Path(os.environ.get('XDG_CACHE_HOME', str(Path.home()/'.cache')))/'i3config/lock'
+    cache.mkdir(parents=True, exist_ok=True)
+    target = cache/(key+'.png')
+    if not target.exists():
+        canvas = Image.new('RGB', tuple(map(int, screen.groups())), '#1e1e2e')
+        with Image.open(wallpaper) as original:
+            source = ImageOps.exif_transpose(original).convert('RGB')
+            for width, height, x, y in outputs:
+                tile = ImageOps.fit(source, (int(width), int(height)), method=Image.Resampling.LANCZOS)
+                canvas.paste(tile, (int(x), int(y)))
+                tile.close()
+            source.close()
+        temporary = target.with_name(key+f'.{os.getpid()}.png')
+        canvas.save(temporary)
+        canvas.close()
+        temporary.replace(target)
+    return target
+
+
+def main():
+    command = ['i3lock', '--nofork', '-c', '1e1e2e']
+    try:
+        command += ['-i', str(prepare())]
+    except Exception as exc:
+        print(f'Wallpaper unavailable; using solid lock background: {exc}', file=sys.stderr)
+    if '--prepare' not in sys.argv:
+        # Preserve XSS_SLEEP_LOCK_FD for i3lock's sleep-inhibitor handoff.
+        os.execvp(command[0], command)
+
+if __name__ == '__main__':
+    main()

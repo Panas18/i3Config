@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+"""Hardware-independent i3blocks with bounded subprocesses and click actions."""
+import glob
+import json
+import os
+import re
+import subprocess
+import time
+from pathlib import Path
+
+
+def run(*args):
+    try:
+        p = subprocess.run(args, capture_output=True, text=True, timeout=3)
+        return p.stdout.strip() if p.returncode == 0 else ''
+    except (OSError, subprocess.TimeoutExpired):
+        return ''
+
+def launch(*args):
+    subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                     start_new_session=True)
+
+def read(path):
+    try:
+        return Path(path).read_text().strip()
+    except OSError:
+        return ''
+
+def meter(percent):
+    filled = max(0, min(5, round(percent/20)))
+    return '▰'*filled + '▱'*(5-filled)
+
+name = os.environ.get('BLOCK_NAME', '')
+click = os.environ.get('BLOCK_BUTTON', '')
+if click == '1':
+    apps = {'network': ['nm-connection-editor'], 'bluetooth': ['blueman-manager'],
+            'volume': ['pavucontrol'], 'brightness': ['kitty', 'brightnessctl', '-l']}
+    if name in apps:
+        launch(*apps[name])
+if name == 'volume' and click in ('3', '4', '5'):
+    run(str(Path.home()/'.local/bin/i3-control'), {'3':'mute','4':'volume-up','5':'volume-down'}[click])
+if name == 'brightness' and click in ('4', '5'):
+    run(str(Path.home()/'.local/bin/i3-control'), 'brightness-up' if click == '4' else 'brightness-down')
+if name == 'network':
+    lines = run('nmcli', '-t', '-f', 'TYPE,STATE,CONNECTION', 'device').splitlines()
+    active = [s.split(':', 2)[2].replace('\\:', ':') for s in lines if ':connected:' in s and not s.startswith('loopback:')]
+    print('NET ' + (', '.join(active) if active else 'offline'))
+elif name == 'bluetooth':
+    info = run('bluetoothctl', 'show')
+    if not info: print('BT unavailable')
+    elif 'Powered: yes' not in info: print('BT off')
+    else:
+        devices = run('bluetoothctl', 'devices', 'Connected').splitlines()
+        print('BT ' + (str(len(devices)) + ' connected' if devices else 'on'))
+elif name == 'volume':
+    info = run('wpctl', 'get-volume', '@DEFAULT_AUDIO_SINK@')
+    if not info: print('🔊 VOL N/A')
+    elif 'MUTED' in info: print('🔇 VOL muted')
+    else: print(f'🔊 VOL {float(info.split()[1])*100:.0f}%')
+elif name == 'brightness':
+    active_internal = False
+    current_external = False
+    external_levels = []
+    for line in run('xrandr', '--current', '--verbose').splitlines():
+        screen = re.match(r'^(\S+) connected\b(.*)', line)
+        if screen:
+            device, details = screen.groups()
+            active = bool(re.search(r'\d+x\d+\+[-\d]+\+[-\d]+', details))
+            internal = device.startswith(('eDP', 'LVDS', 'DSI'))
+            active_internal = active_internal or (active and internal)
+            current_external = active and not internal
+        elif line and not line.startswith((' ', '\t')):
+            current_external = False
+        elif current_external and line.strip().startswith('Brightness:'):
+            external_levels.append(float(line.split(':', 1)[1])*100)
+    if not active_internal and external_levels:
+        print(f'☀️ BRI {sum(external_levels)/len(external_levels):.0f}%')
+    else:
+        info = run('brightnessctl', '-c', 'backlight', '-m')
+        print('☀️ BRI ' + (info.split(',')[3] if info else 'N/A'))
+elif name == 'memory':
+    mem = dict(line.split(':', 1) for line in read('/proc/meminfo').splitlines())
+    total = int(mem['MemTotal'].split()[0]); available = int(mem['MemAvailable'].split()[0])
+    used = (total-available)/total*100
+    print(f'🧠 RAM {meter(used)} {(total-available)/1048576:.1f}/{total/1048576:.1f}G')
+elif name == 'disk':
+    s = os.statvfs(str(Path.home()))
+    used = (s.f_blocks-s.f_bfree)/s.f_blocks*100
+    print(f'💾 DISK {meter(used)} {s.f_bavail*s.f_frsize/1073741824:.0f}G free')
+elif name in ('cpu', 'bandwidth'):
+    state = Path(os.environ.get('XDG_STATE_HOME', str(Path.home()/'.local/state')))/'i3config'
+    state.mkdir(parents=True, exist_ok=True)
+    cache = state/(name + '.json')
+    try:
+        old = json.loads(read(cache))
+    except (ValueError, TypeError):
+        old = {}
+    now = time.monotonic()
+    if name == 'cpu':
+        values = list(map(int, read('/proc/stat').splitlines()[0].split()[1:9]))
+        total, idle = sum(values), values[3] + values[4]
+        delta = total - old.get('total', total)
+        busy = 100 * (1 - (idle-old.get('idle', idle))/delta) if delta > 0 else 0
+        print(f'⚙️ CPU {meter(busy)} {busy:.0f}%')
+        data = {'total': total, 'idle': idle}
+    else:
+        routes = [line.split() for line in read('/proc/net/route').splitlines()[1:]]
+        interfaces = [line[0] for line in routes if line[1] == '00000000']
+        if not interfaces:
+            print('🌐 ↓0 ↑0 KiB/s'); data = {}
+        else:
+            interface = interfaces[0]
+            rx = int(read(f'/sys/class/net/{interface}/statistics/rx_bytes') or 0)
+            tx = int(read(f'/sys/class/net/{interface}/statistics/tx_bytes') or 0)
+            elapsed = now - old.get('time', now)
+            valid = elapsed > 0 and old.get('interface') == interface
+            down = max(0, rx-old.get('rx', rx))/elapsed/1024 if valid else 0
+            up = max(0, tx-old.get('tx', tx))/elapsed/1024 if valid else 0
+            print(f'🌐 ↓{down:.0f} ↑{up:.0f} KiB/s')
+            data = {'rx': rx, 'tx': tx, 'time': now, 'interface': interface}
+    cache.write_text(json.dumps(data))
+elif name == 'battery':
+    batteries = [Path(p) for p in glob.glob('/sys/class/power_supply/*') if read(p+'/type') == 'Battery']
+    print(' | '.join(f'🔋 {read(p/"capacity")}%'  for p in batteries) or '🔌')
+elif name == 'temperature':
+    temps = []
+    for p in glob.glob('/sys/class/thermal/thermal_zone*/temp'):
+        value = read(p)
+        if value.isdigit() and 0 < int(value) < 150000: temps.append(int(value)/1000)
+    print(f'🌡️ {max(temps):.0f}°C' if temps else '🌡️ N/A')

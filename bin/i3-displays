@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+"""Keep i3 workspaces on visible outputs when docking or closing the lid."""
+import argparse
+import fcntl
+import glob
+import json
+import os
+from pathlib import Path
+import re
+import signal
+import subprocess
+import time
+
+
+def command(*args):
+    result = subprocess.run(args, capture_output=True, text=True, timeout=15)
+    if result.returncode:
+        raise RuntimeError(' '.join(args) + ': ' + result.stderr.strip())
+    return result.stdout
+
+
+def outputs():
+    result = []
+    for line in command('xrandr', '--current').splitlines():
+        match = re.match(r'^(\S+) connected\b(.*)', line)
+        if match:
+            name, details = match.groups()
+            result.append({'name': name, 'internal': name.startswith(('eDP', 'LVDS', 'DSI')),
+                           'active': bool(re.search(r'\d+x\d+\+[-\d]+\+[-\d]+', details)),
+                           'primary': ' primary ' in (' '+details+' ')})
+    return result
+
+
+def lid_closed():
+    return any('closed' in Path(p).read_text().lower() for p in glob.glob('/proc/acpi/button/lid/*/state'))
+
+
+def apply_layout(items, closed):
+    internal = [item for item in items if item['internal']]
+    external = [item for item in items if not item['internal']]
+    if closed and external:
+        target = next((item for item in external if item['primary']), external[0])['name']
+        # Enable an external output before disabling the internal one.
+        if not any(item['name'] == target and item['active'] and item['primary'] for item in items):
+            command('xrandr', '--output', target, '--auto', '--primary', '--pos', '0x0')
+        previous = target
+        for item in external:
+            if item['name'] != target:
+                if not item['active']:
+                    command('xrandr', '--output', item['name'], '--auto', '--right-of', previous)
+                previous = item['name']
+        workspaces = json.loads(command('i3-msg', '-t', 'get_workspaces'))
+        internal_names = {item['name'] for item in internal}
+        focused = next((workspace['name'] for workspace in workspaces if workspace['focused']), None)
+        for workspace in workspaces:
+            if workspace['output'] in internal_names:
+                command('i3-msg', f'workspace {json.dumps(workspace["name"], ensure_ascii=False)}; move workspace to output {json.dumps(target, ensure_ascii=False)}')
+        for item in internal:
+            if item['active']:
+                command('xrandr', '--output', target, '--auto', '--primary', '--pos', '0x0', '--output', item['name'], '--off')
+        if focused:
+            command('i3-msg', 'workspace '+json.dumps(focused, ensure_ascii=False))
+    else:
+        # Reopening the lid, or unplugging the last monitor, always restores a screen.
+        for item in internal:
+            if not item['active']:
+                args = ['xrandr', '--output', item['name'], '--auto', '--primary']
+                if external:
+                    args += ['--left-of', external[0]['name']]
+                command(*args)
+    wallpaper = Path.home()/'.local/bin/i3-wallpaper'
+    if wallpaper.exists():
+        command(str(wallpaper))
+    print(f'{time.strftime("%F %T")} lid={"closed" if closed else "open"} external={[x["name"] for x in external]}', flush=True)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--watch', action='store_true')
+    args = parser.parse_args()
+    state = Path(os.environ.get('XDG_STATE_HOME', str(Path.home()/'.local/state')))/'i3config'
+    state.mkdir(parents=True, exist_ok=True)
+    lock = (state/'displays.lock').open('w')
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        return
+    inhibitor = None
+    previous = None
+    failures = 0
+    running = True
+    def stop(*_):
+        nonlocal running
+        running = False
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
+    try:
+        while running:
+            try:
+                items = outputs()
+                failures = 0
+                closed = lid_closed()
+                external = any(not item['internal'] for item in items)
+                if args.watch and external and inhibitor is None:
+                    # logind keeps handling undocked lid closure normally.
+                    inhibitor = subprocess.Popen(['systemd-inhibit', '--what=handle-lid-switch',
+                        '--mode=block', '--who=i3-displays', '--why=Use external displays with the lid closed',
+                        'sleep', 'infinity'], start_new_session=True)
+                elif not external and inhibitor is not None:
+                    os.killpg(inhibitor.pid, signal.SIGTERM)
+                    inhibitor.wait(timeout=5)
+                    inhibitor = None
+                fingerprint = (closed, tuple((x['name'], x['active'], x['primary']) for x in items))
+                if fingerprint != previous:
+                    apply_layout(items, closed)
+                    previous = fingerprint
+            except (OSError, RuntimeError, subprocess.SubprocessError, ValueError) as exc:
+                print(f'Display update failed: {exc}', flush=True)
+                failures += 1
+                if not args.watch:
+                    raise
+                if failures >= 3:
+                    break
+            if not args.watch:
+                break
+            time.sleep(2)
+    finally:
+        if inhibitor is not None and inhibitor.poll() is None:
+            os.killpg(inhibitor.pid, signal.SIGTERM)
+            inhibitor.wait(timeout=5)
+
+if __name__ == '__main__':
+    main()
