@@ -227,11 +227,9 @@ for_window [class="Blueman-manager"] floating enable border normal
 # reload the configuration file
 #bindsym $mod+Shift+c reload
 
-# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
-bindsym $mod+Shift+r restart
 
-# exit i3 (logs you out of your X session)
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
+# Session/power menu (local runtime helper).
+bindsym $mod+Shift+e exec --no-startup-id ~/.local/bin/i3-power-menu
 
 
 # Resize window (you can also use the mouse for that)
@@ -258,12 +256,9 @@ mode "resize" {
         bindsym Escape mode "default"
 }
 
-# Lock screen
-#bindsym $mod+9 exec --no-startup-id blurlock
 
 # Once per login; session output is kept in ~/.local/state/i3config/session.log.
 exec --no-startup-id ~/.local/bin/i3-session-start
-bindsym $mod+Ctrl+Shift+l exec --no-startup-id loginctl lock-session
 
 # Start i3bar to display a workspace bar (plus the system information i3status if available)
 set $bg-color 	         #2f343f
@@ -323,10 +318,6 @@ bindsym XF86AudioPrev exec playerctl previous
 bindsym $mod1+Shift+k exec playerctl play-pause
 bindsym $mod1+Shift+l exec playerctl next
 bindsym $mod1+Shift+j exec playerctl previous
-# xss-lock holds the sleep inhibitor until the screen is locked.
-bindsym $mod+Ctrl+Print exec systemctl suspend
-bindsym $mod+Ctrl+Delete exec i3-nagbar -t warning -m 'Power off?' -b 'Power off' 'systemctl poweroff'
-bindsym $mod+Ctrl+BackSpace exec i3-nagbar -t warning -m 'Restart?' -b 'Restart' 'systemctl reboot'
 bindsym $mod1+u exec --no-startup-id ~/.local/bin/i3-control volume-up
 bindsym $mod1+n exec --no-startup-id ~/.local/bin/i3-control volume-down
 bindsym $mod1+m exec --no-startup-id ~/.local/bin/i3-control mute

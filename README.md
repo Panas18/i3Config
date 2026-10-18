@@ -17,7 +17,9 @@ machine. Their implementations are intentionally excluded from this branch:
 | `~/.local/bin/i3-session-start` | i3 session startup and applets |
 | `~/.local/bin/i3-control`, `i3-brightness` | Audio, laptop backlight and external software dimming |
 | `~/.local/bin/i3-status` | Emoji status blocks and usage bars |
-| `~/.local/bin/i3-wallpaper` | Wallpaper selection and restoration |
+| `~/.local/bin/i3-wallpaper` | Thumbnail wallpaper selection and restoration |
+| `~/.local/bin/i3-lock` | Current wallpaper fitted to each display for i3lock |
+| `~/.local/bin/i3-power-menu` | Rofi lock, suspend, logout, restart and shutdown menu |
 | `~/.local/bin/i3-displays` | Lid handling and external display layout |
 
 The systemd user service also needs `i3-displays`. These features are not
@@ -65,8 +67,9 @@ Alt+l accepts a Copilot suggestion.
 
 - Super+Enter: Kitty; Super+Space: application launcher.
 - Super+Ctrl+n / b / m: network, Bluetooth and audio settings.
-- Super+Ctrl+w: wallpaper picker; Super+Ctrl+Shift+l: lock.
-- Super+Shift+c: reload i3; Super+Shift+r: restart i3.
+- Super+Ctrl+w: wallpaper picker with thumbnail previews.
+- Super+Shift+e: power menu; logout, restart and shutdown ask for confirmation.
+- Super+Shift+c: reload i3. Separate lock, sleep, shutdown and restart shortcuts are removed; use the power menu.
 - Media and brightness keys use the installed runtime helpers.
 - The bar shows temperature, battery, RAM used/total, disk free space, CPU
   load, network throughput, time, volume and brightness. CPU/RAM/disk have explicit
