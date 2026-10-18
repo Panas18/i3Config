@@ -1,4 +1,3 @@
-return {
-	"jose-elias-alvarez/typescript.nvim",
-	requires = { "neovim/nvim-lspconfig", "hrsh7th/nvim-cmp" },
-}
+-- TypeScript support is provided by ts_ls in lsp.lua. The former
+-- jose-elias-alvarez/typescript.nvim repository is no longer available.
+return {}

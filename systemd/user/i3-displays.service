@@ -1,0 +1,11 @@
+[Unit]
+Description=i3 lid and external display handling
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/i3-displays --watch
+Restart=on-failure
+RestartSec=3
+StandardOutput=append:%h/.local/state/i3config/displays.log
+StandardError=append:%h/.local/state/i3config/displays.log

@@ -65,10 +65,6 @@ return { -- Autoformat
 		},
 	},
 	config = function(_, opts)
-		-- Ensure clang-format is installed via Mason
-		require("mason-tool-installer").setup({
-			ensure_installed = { "clang-format" },
-		})
 		require("conform").setup(opts)
 	end,
 }

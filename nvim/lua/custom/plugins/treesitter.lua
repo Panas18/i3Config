@@ -2,10 +2,12 @@ return {
 	-- Treesitter main plugin:
 	{
 		"nvim-treesitter/nvim-treesitter",
+        branch = "master",
+        lazy = false,
 		build = ":TSUpdate",
 		priority = 100,
 		dependencies = {
-			"nvim-treesitter/nvim-treesitter-textobjects",
+			{ "nvim-treesitter/nvim-treesitter-textobjects", branch = "master" },
 		},
 		config = function()
 			local status_ok, configs = pcall(require, "nvim-treesitter.configs")
@@ -13,21 +15,8 @@ return {
 				return
 			end
 			configs.setup({
-				ensure_installed = {
-					"bash",
-					"c",
-					"diff",
-					"html",
-					"lua",
-					"luadoc",
-					"markdown",
-					"markdown_inline",
-					"query",
-					"vim",
-					"vimdoc",
-					"cpp",
-				},
-				auto_install = true,
+                ensure_installed = dofile(vim.fn.stdpath("config") .. "/parsers.lua"),
+				auto_install = false,
 				highlight = {
 					enable = true,
 					additional_vim_regex_highlighting = { "ruby" },
