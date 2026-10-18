@@ -1,7 +1,7 @@
 # macOS terminal and editor configuration
 
 Kitty, tmux, zsh and Neovim configuration only. Ubuntu desktop configuration is
-on `codex/ubuntu`. No installers, standalone utility/test scripts, binaries,
+on `linux`. No installers, standalone utility/test scripts, binaries,
 backup files or vendored plugin checkouts are included.
 
 ## Manual placement

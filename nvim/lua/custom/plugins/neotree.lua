@@ -39,7 +39,6 @@ return {
 			popup_border_style = "rounded",
 			enable_git_status = true,
 			enable_diagnostics = true,
-			enable_normal_mode_for_inputs = false, -- Enable normal mode for input dialogs.
 			open_files_do_not_replace_types = { "terminal", "trouble", "qf" }, -- when opening files, do not use windows containing these filetypes or buftypes
 			sort_case_insensitive = false, -- used when sorting files and directories in the tree
 			sort_function = nil, -- use a custom function for sorting files and directories in the tree
@@ -302,55 +301,22 @@ return {
 					},
 				},
 			},
-			event_handlers = {
-
-				{
-					event = "file_opened",
-					handler = function(file_path)
-						-- auto close
-						-- vimc.cmd("Neotree close")
-						-- OR
-						require("neo-tree.command").execute({ action = "close" })
-					end,
-				},
-				--{
-				--  event = "neo_tree_window_before_open",
-				--  handler = function(args)
-				--    print("neo_tree_window_before_open", vim.inspect(args))
-				--  end
-				--},
-				{
-					event = "neo_tree_window_after_open",
-					handler = function(args)
-						if args.position == "left" or args.position == "right" then
-							vim.cmd("wincmd =")
-						end
-					end,
-				},
-				--{
-				--  event = "neo_tree_window_before_close",
-				--  handler = function(args)
-				--    print("neo_tree_window_before_close", vim.inspect(args))
-				--  end
-				--},
-				{
-					event = "neo_tree_window_after_close",
-					handler = function(args)
-						if args.position == "left" or args.position == "right" then
-							vim.cmd("wincmd =")
-						end
-					end,
-				},
-			},
+            event_handlers = {
+                {
+                    event = "file_opened",
+                    handler = function()
+                        -- Let Neo-tree finish restoring/focusing its windows before
+                        -- closing the sidebar; closing inside the event invalidates them.
+                        vim.schedule(function()
+                            require("neo-tree.command").execute({ action = "close" })
+                        end)
+                    end,
+                },
+            },
 		})
 
-		vim.keymap.set("n", "<leader>e", function()
-			if vim.bo.filetype == "neo-tree" then
-				vim.cmd.wincmd("p")
-				vim.cmd.Neotree("close")
-			else
-				vim.cmd.Neotree("focus")
-			end
-		end, { desc = "Un/Focus Neotree" })
+        vim.keymap.set("n", "<leader>e", function()
+            require("neo-tree.command").execute({ toggle = true, source = "filesystem" })
+        end, { desc = "Toggle Neo-tree" })
 	end,
 }
