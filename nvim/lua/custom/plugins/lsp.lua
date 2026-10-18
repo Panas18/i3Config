@@ -20,7 +20,7 @@ return { -- LSP Configuration & Plugins
 		{ "j-hui/fidget.nvim", opts = {} },
 
 		-- Lua LSP configuration
-		{ "folke/neodev.nvim", opts = { enabled = false } },
+		{ "folke/neodev.nvim", enabled = false },
 	},
 	config = function()
 		vim.api.nvim_create_autocmd("LspAttach", {
@@ -179,6 +179,6 @@ return { -- LSP Configuration & Plugins
 			vim.lsp.config(server_name, server)
             vim.lsp.enable(server_name)
 		end
-		require("mason-lspconfig").setup({ automatic_enable = true })
+		require("mason-lspconfig").setup({ automatic_enable = vim.tbl_keys(servers) })
 	end,
 }

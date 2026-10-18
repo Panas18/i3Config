@@ -1,7 +1,7 @@
 # Ubuntu configuration
 
 Configuration files for i3, i3blocks, Kitty, tmux, zsh and Neovim.
-The macOS terminal/editor configuration is on `codex/macos`.
+The macOS terminal/editor configuration is on `macos`.
 
 This branch contains configuration only: no installers, utility scripts, test
 scripts, binaries or vendored plugins. The full setup is preserved locally on
@@ -67,8 +67,9 @@ Alt+l accepts a Copilot suggestion.
 - Super+Ctrl+w: wallpaper picker; Super+Ctrl+Shift+l: lock.
 - Super+Shift+c: reload i3; Super+Shift+r: restart i3.
 - Media and brightness keys use the installed runtime helpers.
-- The bar shows temperature, battery, RAM, disk, CPU, network throughput and time.
-  Brightness briefly appears on signal 10 after a brightness keypress.
+- The bar shows temperature, battery, RAM used/total, disk free space, CPU
+  load, network throughput, time, volume and brightness. CPU/RAM/disk have explicit
+  labels and usage bars. Signals 10 and 11 refresh brightness and volume.
 - Closing the lid with an external screen connected moves workspaces there;
   reopening it or unplugging the last external screen restores the laptop panel.
 - Zsh: Tab completes; Right Arrow or Ctrl+Space accepts a suggestion.

@@ -25,7 +25,10 @@ command=date '+🕒 %a %d %b %H:%M'
 interval=5
 color=#a6e3a1
 
-# Hidden normally; signal 10 shows a brief brightness readout after a keypress.
+[volume]
+interval=2
+signal=11
+
 [brightness]
-interval=once
+interval=2
 signal=10
