@@ -52,7 +52,8 @@ The configuration targets Neovim 0.11 with the locked Treesitter master branch.
 Git, a C compiler, make, unzip, curl, Python/venv, Node/npm and ripgrep are needed.
 `lazy.nvim` bootstraps itself and uses `nvim/lazy-lock.json`. Run `:Lazy restore`
 to apply the locked versions and `:MasonToolsInstall` to install configured
-language tools. Go is needed to build the configured Go debugger. System clangd
+language tools, including Markdown linting. Unavailable optional linters are
+skipped so they cannot block file opening. Go is needed to build the configured Go debugger. System clangd
 and clang-format are reused when installed on Ubuntu.
 
 The parser list is in `nvim/parsers.lua`; Treesitter installs missing parsers.

@@ -166,7 +166,7 @@ return { -- LSP Configuration & Plugins
 		require("mason-tool-installer").setup({
             run_on_start = false,
 			ensure_installed = {
-                "ts_ls", "eslint", "lua_ls", "omnisharp", "stylua", "prettier", "black", "isort", "delve",
+                "ts_ls", "eslint", "lua_ls", "omnisharp", "stylua", "prettier", "black", "isort", "delve", "markdownlint",
                 -- Ubuntu provides these binaries; avoid downloading duplicate archives.
                 { "clangd", condition = function() return vim.fn.executable("/usr/bin/clangd") == 0 end },
                 { "clang-format", condition = function() return vim.fn.executable("/usr/bin/clang-format") == 0 end },
