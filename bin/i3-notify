@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+"""Show a short, replaceable Dunst progress notification for media controls."""
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+
+def main():
+    action = sys.argv[1] if len(sys.argv) > 1 else ''
+    if action.startswith('brightness-'):
+        state = Path(os.environ.get('XDG_STATE_HOME', str(Path.home()/'.local/state')))
+        level = json.loads((state/'i3config/brightness-level.json').read_text())['percent']
+        title, icon, tag = '☀️ Brightness', 'display-brightness', 'brightness'
+    else:
+        microphone = action == 'mic-mute'
+        sink = '@DEFAULT_AUDIO_SOURCE@' if microphone else '@DEFAULT_AUDIO_SINK@'
+        command = ['wpctl', 'get-volume', sink] if microphone else [str(Path.home()/'.local/bin/i3-audio'), 'status']
+        info = subprocess.check_output(command, text=True, timeout=10)
+        muted = 'MUTED' in info
+        level = 0 if muted else round(float(info.split()[1])*100)
+        title = ('🎤 Microphone' if microphone else '🔇 Muted' if muted else '🔊 Volume')
+        icon = 'microphone-sensitivity-muted' if microphone and muted else 'microphone-sensitivity-high' if microphone else 'audio-volume-muted' if muted else 'audio-volume-high'
+        tag = 'microphone' if microphone else 'volume'
+    level = max(0, min(100, round(level)))
+    subprocess.run(['dunstify', '-a', 'i3-controls', '-u', 'low', '-t', '1400',
+                    '-h', f'string:x-dunst-stack-tag:{tag}', '-h', f'int:value:{level}',
+                    '-i', icon, title, f'{level}%'], timeout=2, check=False)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, ValueError, KeyError, IndexError, subprocess.SubprocessError):
+        pass  # A notification failure must not interrupt the control itself.

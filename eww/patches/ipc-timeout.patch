@@ -1,0 +1,26 @@
+diff --git a/crates/eww/src/client.rs b/crates/eww/src/client.rs
+index 616c387..e9465c6 100644
+--- a/crates/eww/src/client.rs
++++ b/crates/eww/src/client.rs
+@@ -37,7 +37,7 @@ pub fn do_server_call(stream: &mut UnixStream, action: &opts::ActionWithServer)
+     stream.write_all(&message_bytes).context("Failed to write command to IPC stream")?;
+ 
+     let mut buf = Vec::new();
+-    stream.set_read_timeout(Some(std::time::Duration::from_millis(100))).context("Failed to set read timeout")?;
++    stream.set_read_timeout(Some(std::time::Duration::from_secs(5))).context("Failed to set read timeout")?;
+     stream.read_to_end(&mut buf).context("Error reading response from server")?;
+ 
+     Ok(if buf.is_empty() {
+diff --git a/crates/eww/src/ipc_server.rs b/crates/eww/src/ipc_server.rs
+index 7630f00..a5882ea 100644
+--- a/crates/eww/src/ipc_server.rs
++++ b/crates/eww/src/ipc_server.rs
+@@ -39,7 +39,7 @@ async fn handle_connection(mut stream: tokio::net::UnixStream, evt_send: Unbound
+ 
+     if let Some(mut response_recv) = maybe_response_recv {
+         log::debug!("Waiting for response for IPC client");
+-        if let Ok(Some(response)) = tokio::time::timeout(Duration::from_millis(100), response_recv.recv()).await {
++        if let Ok(Some(response)) = tokio::time::timeout(Duration::from_secs(5), response_recv.recv()).await {
+             let response = bincode::serialize(&response)?;
+             let result = &stream_write.write_all(&response).await;
+             crate::print_result_err!("sending text response to ipc client", &result);

@@ -1,0 +1,10 @@
+configuration {
+    modi: "drun,window,run";
+    show-icons: true;
+    font: "Sans 12";
+    display-drun: "Apps";
+    display-window: "Windows";
+    display-run: "Run";
+    drun-display-format: "{name}";
+}
+@theme "modern"

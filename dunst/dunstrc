@@ -1,0 +1,75 @@
+[global]
+    follow = keyboard
+    width = 360
+    height = (0, 100)
+    origin = top-right
+    offset = (16, 48)
+    notification_limit = 4
+    font = Sans 11
+    format = "<b>%s</b>\n%b"
+    markup = full
+    word_wrap = no
+    ignore_newline = yes
+    ellipsize = end
+    alignment = left
+    vertical_alignment = center
+    padding = 12
+    horizontal_padding = 12
+    text_icon_padding = 12
+    frame_width = 1
+    frame_color = "#45475a"
+    separator_height = 2
+    separator_color = frame
+    gap_size = 8
+    corner_radius = 12
+    transparency = 0
+    icon_position = left
+    enable_recursive_icon_lookup = true
+    icon_theme = "Adwaita"
+    min_icon_size = 32
+    max_icon_size = 48
+    progress_bar = true
+    progress_bar_height = 8
+    progress_bar_frame_width = 0
+    progress_bar_min_width = 240
+    progress_bar_max_width = 300
+    progress_bar_corner_radius = 4
+    highlight = "#89b4fa"
+    show_age_threshold = 60
+    history_length = 50
+    sticky_history = no
+    mouse_left_click = do_action, close_current
+    mouse_middle_click = close_all
+    mouse_right_click = close_current
+
+[urgency_low]
+    background = "#1e1e2e"
+    foreground = "#cdd6f4"
+    timeout = 4
+
+[urgency_normal]
+    background = "#1e1e2e"
+    foreground = "#cdd6f4"
+    timeout = 7
+
+[urgency_critical]
+    background = "#1e1e2e"
+    foreground = "#f5c2e7"
+    frame_color = "#f38ba8"
+    timeout = 0
+
+[media_controls]
+    appname = i3-controls
+    format = "<b>%s</b>  %b"
+    timeout = 2
+    history_ignore = yes
+
+[brightness]
+    appname = i3-controls
+    stack_tag = brightness
+    highlight = "#f9e2af"
+
+[volume]
+    appname = i3-controls
+    stack_tag = volume
+    highlight = "#89b4fa"

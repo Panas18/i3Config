@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Enable libinput tap-to-click through the installed XInput library."""
+"""Enable touchpad tap-to-click and natural scrolling through XInput."""
 
 import ctypes as C
 
@@ -106,6 +106,30 @@ try:
             if not length.value or data[0] != 1:
                 raise RuntimeError("Tap-to-click verification failed")
             print("Tap-to-click enabled and verified:", device.name.decode())
+            # Only devices supporting tapping are changed; mice keep their settings.
+            scroll_atom = x.XInternAtom(display, b"libinput Natural Scrolling Enabled", 1)
+            if scroll_atom:
+                scroll_type, scroll_len, scroll_left = C.c_ulong(), C.c_ulong(), C.c_ulong()
+                scroll_fmt = C.c_int()
+                scroll_data = C.POINTER(C.c_ubyte)()
+                xi.XIGetProperty(display, device.deviceid, scroll_atom, 0, 1, 0, 0,
+                                 C.byref(scroll_type), C.byref(scroll_fmt), C.byref(scroll_len),
+                                 C.byref(scroll_left), C.byref(scroll_data))
+                if scroll_type.value and scroll_fmt.value == 8 and scroll_len.value == 1:
+                    enabled = (C.c_ubyte * 1)(1)
+                    xi.XIChangeProperty(display, device.deviceid, scroll_atom,
+                                        scroll_type.value, 8, 0, enabled, 1)
+                    x.XSync(display, 0)
+                    x.XFree(scroll_data)
+                    scroll_data = C.POINTER(C.c_ubyte)()
+                    xi.XIGetProperty(display, device.deviceid, scroll_atom, 0, 1, 0, 0,
+                                     C.byref(scroll_type), C.byref(scroll_fmt), C.byref(scroll_len),
+                                     C.byref(scroll_left), C.byref(scroll_data))
+                    if not scroll_len.value or scroll_data[0] != 1:
+                        raise RuntimeError("Natural scrolling verification failed")
+                    print("Natural scrolling enabled and verified:", device.name.decode())
+                if scroll_data:
+                    x.XFree(scroll_data)
             found += 1
         if data:
             x.XFree(data)

@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+"""Control the playback output, falling back to the default when idle."""
+import json
+import subprocess
+import sys
+
+
+def call(*args):
+    return subprocess.check_output(['pactl', *args], text=True, timeout=3).strip()
+
+
+def target():
+    sinks = json.loads(call('-f', 'json', 'list', 'sinks'))
+    streams = json.loads(call('-f', 'json', 'list', 'sink-inputs'))
+    default = call('get-default-sink')
+    by_id = {s['index']: s for s in sinks}
+    playing = [s for s in streams if not s.get('corked') and not s.get('mute')]
+    candidates = {s['sink'] for s in (playing or streams) if s['sink'] in by_id}
+    if len(candidates) == 1:
+        return by_id[next(iter(candidates))]
+    preferred = next((s for s in sinks if s['name'] == default), None)
+    if preferred and (not candidates or preferred['index'] in candidates):
+        return preferred
+    if candidates:
+        return by_id[min(candidates)]
+    if preferred:
+        return preferred
+    raise RuntimeError('No audio output available')
+
+
+def main():
+    sink = target()
+    action = sys.argv[1] if len(sys.argv) > 1 else 'status'
+    values = [v['value']/65536 for v in sink['volume'].values()]
+    level = max(values, default=0)
+    if action == 'status':
+        print(f'Volume: {level:.4f}' + (' [MUTED]' if sink['mute'] else ''))
+    elif action in ('volume-up', 'volume-down'):
+        delta = min(.05, max(0, 1-level)) if action == 'volume-up' else -min(.05, level)
+        call('set-sink-volume', sink['name'], ('+' if delta >= 0 else '-')+f'{abs(delta)*100:.3f}%')
+    elif action == 'mute':
+        call('set-sink-mute', sink['name'], 'toggle')
+    else:
+        raise ValueError('Unknown action')
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as exc:
+        print(str(exc), file=sys.stderr)
+        sys.exit(1)

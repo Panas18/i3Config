@@ -1,0 +1,7 @@
+* { all: unset; font-family: Sans; font-size: 14px; }
+.panel { background: #1e1e2e; color: #cdd6f4; padding: 20px; border: 1px solid #45475a; border-radius: 14px; }
+.heading { font-size: 18px; font-weight: bold; }
+button { background: #313244; padding: 10px 14px; border-radius: 8px; }
+button:hover { background: #45475a; color: #89b4fa; }
+progressbar trough { background: #313244; border-radius: 4px; min-height: 8px; }
+progressbar progress { background: #89b4fa; border-radius: 4px; min-height: 8px; }

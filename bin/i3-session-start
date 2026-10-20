@@ -10,7 +10,8 @@ systemctl --user start i3-displays.service
 start nm-applet
 start blueman-applet
 start dunst
-start picom --backend xrender
+start picom --config "$HOME/.config/picom/picom.conf"
+command -v copyq >/dev/null && start copyq
 start /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1
 start xss-lock --session="${XDG_SESSION_ID:?Missing login session}" --transfer-sleep-lock -- "$HOME/.local/bin/i3-lock"
 xset s 600 600

@@ -1,0 +1,8 @@
+[Unit]
+Description=i3 control center widgets
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/eww daemon --no-daemonize
+Restart=on-failure
+RestartSec=2

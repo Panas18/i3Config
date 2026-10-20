@@ -23,11 +23,14 @@ session used by the lock listener.
 | --- | --- |
 | `~/.local/bin/i3-session-start` | i3 session startup and applets |
 | `~/.local/bin/i3-control`, `i3-brightness` | Audio, laptop backlight and external software dimming |
+| `~/.local/bin/i3-notify` | Volume and brightness progress notifications via dunstify |
+| `~/.local/bin/i3-audio` | Playback output selection and volume control |
+| `~/.local/bin/i3-center`, `i3-status-value` | On-demand control center and widget values |
 | `~/.local/bin/i3-status` | Emoji status blocks and usage bars |
 | `~/.local/bin/i3-wallpaper` | Thumbnail wallpaper selection and restoration |
 | `~/.local/bin/i3-lock` | Current wallpaper fitted to each display for i3lock |
 | `~/.local/bin/i3-power-menu` | Rofi lock, suspend, logout, restart and shutdown menu |
-| `~/.local/bin/i3-touchpad` | Enable libinput tap-to-click on login/reload |
+| `~/.local/bin/i3-touchpad` | Enable touchpad tap-to-click and natural scrolling on login/reload |
 | `~/.local/bin/i3-displays` | Lid handling and external display layout |
 
 After copying the configuration and service, run `systemctl --user daemon-reload`
@@ -47,7 +50,7 @@ Back up existing files before manually copying configuration.
 | `.zshrc` | `~/.zshrc` |
 | `i3/`, `i3blocks/`, `kitty/`, `tmux/`, `nvim/` | Corresponding directories in `~/.config/` |
 | `tmux/tmux.conf` | `~/.tmux.conf` for compatibility |
-| `systemd/user/i3-displays.service` | `~/.config/systemd/user/i3-displays.service` |
+| `systemd/user/*.service` | `~/.config/systemd/user/` |
 
 Required desktop packages include i3-wm, i3blocks, Kitty, tmux, zsh, feh, rofi,
 NetworkManager/nm-applet, Blueman/BlueZ, PipeWire/WirePlumber, pavucontrol,
@@ -84,10 +87,17 @@ Alt+l accepts a Copilot suggestion.
 - Super+Ctrl+w: wallpaper picker with thumbnail previews.
 - Super+Shift+e: power menu; logout, restart and shutdown ask for confirmation.
 - Super+Shift+c: reload i3. Separate lock, sleep, shutdown and restart shortcuts are removed; use the power menu.
+- Super+U / Super+N: volume up/down on the playback output. Alt+U / Alt+N also work.
 - Media and brightness keys use the installed runtime helpers.
-- The bar shows temperature, battery, RAM used/total, disk free space, CPU
-  load, network throughput, time, volume and brightness. CPU/RAM/disk have explicit
-  labels and usage bars. Signals 10 and 11 refresh brightness and volume.
+- Bar order: network name, battery, sound, brightness, temperature, CPU,
+  RAM, storage, Bluetooth, network traffic, then full date/time.
+  RAM/disk/CPU use four-cell usage graphs. Sound icons follow volume/mute;
+  battery shows 🔌 when charging/full and 🪫 when low.
+  Bluetooth × means off/unavailable, ✓ means on, and a number counts connected
+  devices. Traffic uses K/M for KiB/s/MiB/s. Use nm-applet in the primary display’s system tray to select Wi-Fi networks. Click the network name or traffic, or press Super+Ctrl+N, for the floating connection editor; click Bluetooth for the floating Blueman manager.
+  Volume/brightness changes show short progress notifications (requires dunstify,
+  provided by Dunst); repeated changes replace the previous popup.
+  Signals 10 and 11 refresh brightness and volume.
 - Closing the lid with an external screen connected moves workspaces there;
   reopening it or unplugging the last external screen restores the laptop panel.
 - Zsh: Tab completes; Right Arrow or Ctrl+Space accepts a suggestion.
@@ -100,3 +110,42 @@ The installed Ubuntu session passed i3 syntax validation, zsh interactive Tab an
 history-suggestion checks, all three tmux palettes, Neovim startup/parser checks
 and TypeScript LSP attachment. Runtime helpers are included in `bin/` and were tested locally. macOS runtime behaviour needs validation
 on a Mac.
+
+Click the sound indicator or press Super+Ctrl+M to open the floating
+pavucontrol Output Devices tab. Choose the fallback/default output there;
+use Playback to route existing apps and Configuration to enable HDMI/Bluetooth
+profiles when needed.
+
+Audio keys, bar and notifications follow the output used by playback (including
+paused streams), falling back to the default output when no stream exists. With
+multiple outputs playing, the default is preferred if active, otherwise one
+active output is selected deterministically. `bin/i3-audio` requires `pactl`
+from `pulseaudio-utils` (compatible with PipeWire).
+
+Dunst theme: copy `dunst/dunstrc` to `~/.config/dunst/dunstrc` and run
+`dunstctl reload`. Normal notifications expire after 7 seconds; critical alerts
+remain until dismissed. Right-click dismisses one, middle-click dismisses all,
+and left-click runs the default action when available. Media popups have
+progress bars and are excluded from history. `dunstctl history-pop` recalls
+a notification. Click the clock for a floating calendar (requires `zenity`).
+
+## Desktop polish
+
+Copy `picom/`, `rofi/`, and `eww/` into `~/.config/` alongside the other
+configuration folders. Picom uses subtle shadows/fades with no blur.
+Super+Ctrl+V opens CopyQ clipboard history; Super+V keeps its i3 split action.
+Super+S toggles the Eww control center. CopyQ is started at login; Eww starts
+on demand through `systemd/user/i3-eww.service` (copy it to
+`~/.config/systemd/user/` and run `systemctl --user daemon-reload`). Install CopyQ and build Eww with X11 support if unavailable in apt.
+The control center uses the same audio/brightness helpers as the media keys.
+
+Eww build used: official tag `v0.6.0`, with the locked `time` dependency
+updated from 0.3.34 to 0.3.36 for compatibility with the installed Rust compiler.
+Build with `cargo build --release --locked --no-default-features --features x11 -j 2`
+after `cargo update -p time@0.3.34 --precise 0.3.36`. Install the resulting
+`target/release/eww` into `~/.local/bin/`; binaries are not tracked here.
+
+Before building Eww, apply `eww/patches/ipc-timeout.patch` from this repository
+to the Eww source (`git apply /path/to/i3Config/eww/patches/ipc-timeout.patch`).
+This raises its IPC response timeout to 5 seconds so slower panel creation
+does not trigger a second daemon.

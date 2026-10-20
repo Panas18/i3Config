@@ -1,29 +1,12 @@
 command=~/.local/bin/i3-status
-separator_block_width=8
+separator_block_width=4
 markup=none
 
-[temperature]
-interval=10
+[network]
+interval=5
 
 [battery]
 interval=15
-
-[memory]
-interval=5
-
-[disk]
-interval=30
-
-[cpu]
-interval=3
-
-[bandwidth]
-interval=2
-
-[time]
-command=date '+🕒 %a %d %b %H:%M'
-interval=5
-color=#a6e3a1
 
 [volume]
 interval=2
@@ -32,3 +15,25 @@ signal=11
 [brightness]
 interval=2
 signal=10
+
+[temperature]
+interval=10
+
+[cpu]
+interval=3
+
+[memory]
+interval=5
+
+[disk]
+interval=30
+
+[bluetooth]
+interval=10
+
+[bandwidth]
+interval=2
+
+[time]
+interval=1
+color=#a6e3a1

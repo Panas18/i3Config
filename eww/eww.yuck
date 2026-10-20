@@ -1,0 +1,29 @@
+(defvar center-visible false)
+(defpoll volume :run-while center-visible :interval "2s" :initial "0" "~/.local/bin/i3-audio status | awk '{printf \"%.0f\", $2*100}'")
+(defpoll brightness :run-while center-visible :interval "3s" :initial "0" "~/.local/bin/i3-status-value brightness")
+(defwindow control-center
+  :monitor "<primary>"
+  :geometry (geometry :x "-16px" :y "48px" :width "540px" :height "400px" :anchor "top right")
+  :stacking "fg" :windowtype "dialog" :wm-ignore false
+  (box :class "panel" :orientation "v" :space-evenly false :spacing 16
+    (box :space-evenly false (label :class "heading" :text "Control center" :hexpand true :xalign 0)
+      (button :timeout "10s" :onclick "~/.local/bin/i3-center close" "✕"))
+    (box :spacing 10
+      (button :timeout "10s" :onclick "~/.local/bin/i3-center launch network" "📶 Network")
+      (button :timeout "10s" :onclick "~/.local/bin/i3-center launch bluetooth" "🔵 Bluetooth"))
+    (label :xalign 0 :text "🔊 Volume  ${volume}%")
+    (box :spacing 12 (button :timeout "10s" :onclick "~/.local/bin/i3-control volume-down" "−")
+      (progress :value volume :hexpand true)
+      (button :timeout "10s" :onclick "~/.local/bin/i3-control volume-up" "+"))
+    (button :timeout "10s" :onclick "~/.local/bin/i3-center launch audio" "Choose audio output")
+    (label :xalign 0 :text "☀ Brightness  ${brightness}%")
+    (box :spacing 12 (button :timeout "10s" :onclick "~/.local/bin/i3-control brightness-down" "−")
+      (progress :value brightness :hexpand true)
+      (button :timeout "10s" :onclick "~/.local/bin/i3-control brightness-up" "+"))
+    (box :spacing 10
+      (button :timeout "10s" :onclick "playerctl previous" "⏮")
+      (button :timeout "10s" :onclick "playerctl play-pause" "⏯")
+      (button :timeout "10s" :onclick "playerctl next" "⏭"))
+    (box :spacing 10
+      (button :timeout "10s" :onclick "~/.local/bin/i3-center launch wallpaper" "Wallpaper")
+      (button :timeout "10s" :onclick "~/.local/bin/i3-center launch power" "Power"))))

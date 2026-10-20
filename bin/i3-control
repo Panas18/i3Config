@@ -6,9 +6,7 @@ if [[ ${1:-} == brightness-* ]]; then
   flock -n 9 || exit 0
 fi
 case "${1:-}" in
- volume-up) wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+ ;;
- volume-down) wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- ;;
- mute) wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle ;;
+ volume-up|volume-down|mute) "$HOME/.local/bin/i3-audio" "$1" ;;
  mic-mute) wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle ;;
  brightness-up) "$HOME/.local/bin/i3-brightness" +5 ;;
  brightness-down) "$HOME/.local/bin/i3-brightness" -- -5 ;;
@@ -18,3 +16,6 @@ if [[ $1 == brightness-* ]]; then
   pkill -u "$UID" -RTMIN+10 -x i3blocks || true
 fi
 if [[ $1 != brightness-* ]]; then pkill -u "$UID" -RTMIN+11 -x i3blocks || true; fi
+
+# Replace the previous popup rather than queueing repeated key events.
+"$HOME/.local/bin/i3-notify" "$1" >/dev/null 2>&1 &

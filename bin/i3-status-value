@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+"""Extract a numeric status value for desktop widgets."""
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+result = subprocess.run([str(Path.home()/'.local/bin/i3-status')], env={**os.environ, 'BLOCK_NAME': sys.argv[1], 'BLOCK_BUTTON': ''}, capture_output=True, text=True, timeout=5)
+match = re.search(r'(\d+)%', result.stdout)
+print(match[1] if match else '0')

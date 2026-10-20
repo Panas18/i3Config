@@ -1,0 +1,20 @@
+* {
+    bg: #1e1e2e;
+    fg: #cdd6f4;
+    muted: #a6adc8;
+    accent: #89b4fa;
+    background-color: transparent;
+    text-color: @fg;
+    border-color: #45475a;
+}
+window { width: 560px; background-color: @bg; border: 1px; border-radius: 14px; padding: 16px; }
+mainbox { spacing: 12px; }
+inputbar { spacing: 10px; padding: 12px; background-color: #313244; border-radius: 8px; children: [prompt, entry]; }
+prompt { text-color: @accent; }
+entry { placeholder: "Search…"; placeholder-color: @muted; }
+listview { lines: 8; fixed-height: false; spacing: 4px; scrollbar: false; }
+element { padding: 10px; spacing: 10px; border-radius: 8px; }
+element selected.normal { background-color: #313244; text-color: @accent; }
+element-icon { size: 24px; }
+element-text { vertical-align: 0.5; }
+message { padding: 8px; }
