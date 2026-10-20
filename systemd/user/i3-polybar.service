@@ -1,0 +1,9 @@
+[Unit]
+Description=i3 Polybar status panel
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/i3-polybar
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=3

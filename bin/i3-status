@@ -85,10 +85,10 @@ elif name == 'brightness':
         elif current_external and line.strip().startswith('Brightness:'):
             external_levels.append(float(line.split(':', 1)[1])*100)
     if not active_internal and external_levels:
-        print(f'☀️{sum(external_levels)/len(external_levels):.0f}%')
+        print(f'☀{sum(external_levels)/len(external_levels):.0f}%')
     else:
         info = run('brightnessctl', '-c', 'backlight', '-m')
-        print('☀️' + (info.split(',')[3] if info else '–'))
+        print('☀' + (info.split(',')[3] if info else '–'))
 elif name == 'memory':
     mem = dict(line.split(':', 1) for line in read('/proc/meminfo').splitlines())
     total = int(mem['MemTotal'].split()[0]); available = int(mem['MemAvailable'].split()[0])
@@ -112,7 +112,7 @@ elif name in ('cpu', 'bandwidth'):
         total, idle = sum(values), values[3] + values[4]
         delta = total - old.get('total', total)
         busy = 100 * (1 - (idle-old.get('idle', idle))/delta) if delta > 0 else 0
-        print(f'⚙️{meter(busy)}')
+        print(f'⚙{meter(busy)}')
         data = {'total': total, 'idle': idle}
     else:
         routes = [line.split() for line in read('/proc/net/route').splitlines()[1:]]
@@ -145,4 +145,4 @@ elif name == 'temperature':
     for p in glob.glob('/sys/class/thermal/thermal_zone*/temp'):
         value = read(p)
         if value.isdigit() and 0 < int(value) < 150000: temps.append(int(value)/1000)
-    print(f'🌡️{max(temps):.0f}°C' if temps else '🌡️N/A')
+    print(f'🌡{max(temps):.0f}°C' if temps else '🌡N/A')

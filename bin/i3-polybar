@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export PATH="$HOME/.local/bin:$PATH"
+# Use the primary monitor, falling back to the first active output.
+MONITOR=$(polybar --list-monitors | awk -F: '/primary/{print $1; exit}')
+if [[ -z $MONITOR ]]; then
+  MONITOR=$(polybar --list-monitors | head -n 1 | cut -d: -f1)
+fi
+export MONITOR
+exec polybar --reload --config="$HOME/.config/polybar/config.ini" main

@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import re
 import signal
+import shutil
 import subprocess
 import time
 
@@ -68,6 +69,9 @@ def apply_layout(items, closed):
                 if external:
                     args += ['--left-of', external[0]['name']]
                 command(*args)
+    # Reload the panel after display changes so it follows the active primary.
+    subprocess.run(['systemctl', '--user', 'try-restart', 'i3-polybar.service'],
+                   capture_output=True, timeout=10)
     wallpaper = Path.home()/'.local/bin/i3-wallpaper'
     if wallpaper.exists():
         command(str(wallpaper))
@@ -87,6 +91,7 @@ def main():
         return
     inhibitor = None
     previous = None
+    previous_connections = None
     failures = 0
     running = True
     def stop(*_):
@@ -99,6 +104,14 @@ def main():
             try:
                 items = outputs()
                 failures = 0
+                connections = tuple(item['name'] for item in items)
+                if connections != previous_connections and shutil.which('autorandr'):
+                    # Apply a saved profile once per hardware change, then enforce lid safety.
+                    result = subprocess.run(['autorandr', '--change'], capture_output=True, text=True, timeout=20)
+                    if result.returncode:
+                        print('Autorandr: '+result.stderr.strip(), flush=True)
+                    items = outputs()
+                previous_connections = connections
                 closed = lid_closed()
                 external = any(not item['internal'] for item in items)
                 if args.watch and external and inhibitor is None:

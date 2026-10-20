@@ -149,3 +149,25 @@ Before building Eww, apply `eww/patches/ipc-timeout.patch` from this repository
 to the Eww source (`git apply /path/to/i3Config/eww/patches/ipc-timeout.patch`).
 This raises its IPC response timeout to 5 seconds so slower panel creation
 does not trigger a second daemon.
+
+## Polybar and display profiles
+
+Install `polybar` (3.7 or newer) and `autorandr`. Copy `polybar/` to
+`~/.config/polybar/`, all `bin/i3-*` helpers to `~/.local/bin/`, and the user
+services to `~/.config/systemd/user/`. Run `systemctl --user daemon-reload`.
+The session starts `i3-polybar.service`; the i3bar block is removed. The retained
+`i3blocks/` config is an optional fallback rather than a second running panel.
+Polybar uses Fira Code, Noto Color Emoji, DejaVu Sans and FontAwesome.
+
+The panel preserves the status order, clickable audio/network/Bluetooth/calendar
+controls and workspace navigation. Scroll sound/brightness to change levels;
+right-click sound to mute. The ☰ button opens the control center; right-click
+opens the power menu. The tray includes nm-applet and Blueman.
+
+Save each desired monitor arrangement with `autorandr --save PROFILE_NAME`.
+The current machine's docked arrangement is saved locally as `docked`.
+Profiles contain hardware-specific display identifiers and stay in
+`~/.config/autorandr/`, outside this repository. The existing display watcher
+runs `autorandr --change` once when connected outputs change, then enforces
+lid safety and refreshes Polybar/wallpaper. Avoid adding a second autorandr
+polling loop. Unplug/open-lid handling still restores the laptop display.

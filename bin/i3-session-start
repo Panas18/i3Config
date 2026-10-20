@@ -6,7 +6,7 @@ exec >> "$logdir/session.log" 2>&1
 echo "Session started $(date -Is)"
 dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP
 start() { pgrep -u "$UID" -f "^$1( |$)" >/dev/null || "$@" & }
-systemctl --user start i3-displays.service
+systemctl --user start i3-displays.service i3-polybar.service
 start nm-applet
 start blueman-applet
 start dunst
