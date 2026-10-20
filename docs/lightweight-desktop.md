@@ -2,7 +2,7 @@
 
 Reviewed and installed on Ubuntu 26.04 / X11 i3, 20 October 2026. The goal is a
 coherent settings menu without adding a full desktop environment or resident
-settings daemon. The new hub, submenus, calendar and appearance editor exit
+settings daemon. The menus, calendar and appearance editor exit
 when closed. Existing NetworkManager/BlueZ/audio services remain responsible
 for the hardware.
 
@@ -10,7 +10,8 @@ for the hardware.
 
 | Feature | Implementation | Installation / idle impact |
 | --- | --- | --- |
-| Searchable settings hub | Rofi + `i3-settings`, matching Mocha colors | New local helper; no idle process |
+| Unified Ubuntu Settings | Installed GNOME Control Center via `i3-ubuntu-settings` | Process-local compatibility hint; on demand |
+| Automatically discovered desktop tools | Rofi + GIO/XDG app catalog | New local helper; no idle process or indexer |
 | Wi-Fi/network menu | Pinned `networkmanager-dmenu` with Rofi | New local script; existing libnm/PyGObject; passwords obscured |
 | Bluetooth menu | BlueZ D-Bus saved/connected device list | New local helper; no periodic scan; Blueman handles new pairing |
 | Appearance | LXAppearance GTK3 | New local application; no settings daemon |
@@ -31,7 +32,7 @@ Useful future additions, intentionally not installed automatically:
 - Manual printer configuration if you actually use a printer.
 - A password manager launcher for your chosen password manager.
 
-Full GNOME/KDE/Xfce settings sessions, another panel, Conky, animated wallpaper,
+Full GNOME/KDE/Xfce desktop sessions, another panel, Conky, animated wallpaper,
 blur, another system monitor daemon, and a second power-management daemon add
 work or duplicate tools here. None were added. TLP was not installed alongside
 the machine's existing power-profile service.
@@ -50,13 +51,51 @@ the machine's existing power-profile service.
 - A five-second sample with the desktop updating showed Polybar and Eww at
   0% CPU and Picom at 5.6% of **one core**. This excludes short-lived status
   children and is not a whole-system idle benchmark or a guaranteed limit.
-- No `i3-settings`, network-menu, calendar or appearance process remains after
+- No desktop-tools, network-menu, calendar or appearance process remains after
   the corresponding window closes. These additions have no resident idle RSS.
   Existing Polybar, Picom, Dunst, Eww, CopyQ and hardware services still use RAM.
 
 To inspect real workload, use `htop` or `pidstat`; compare the same applications
 and screen activity before drawing conclusions. RSS includes shared libraries
 and must not be treated as private memory.
+
+## Ubuntu Settings integration and limitations
+
+`i3-settings` now opens Ubuntu's existing `gnome-control-center`, landing on
+Wi-Fi. `i3-ubuntu-settings bluetooth`, `sound`, `network`, etc. open a panel in
+the same application. Network and Bluetooth quick-settings buttons use those
+panels. The **Ubuntu Settings (i3)** desktop entry exposes it in the app launcher.
+
+The wrapper changes `XDG_CURRENT_DESKTOP` only for this process, satisfying its
+GNOME/Unity desktop check. It does not change the login environment, start GNOME
+Shell, replace i3, or autostart any settings daemon. `GSK_RENDERER=cairo` is the
+app-local default for this older Intel GPU; an explicit existing renderer is
+preserved. Missing `gnome-control-center` falls back to Desktop tools.
+
+This is a compatibility launch, not full GNOME integration. Wi-Fi, Bluetooth
+and sound panel launches were checked without changing the network connection,
+pairing a device or changing audio. GNOME-specific controls may show warnings
+or be unavailable without their backend. In particular, i3 display layouts,
+wallpaper, shortcuts and Dunst notifications remain in **Desktop tools**.
+Opening the Bluetooth panel produced GLib backend warnings on this session;
+Bluetooth pairing and radio toggles were not validated. The lightweight
+Bluetooth menu and Blueman remain available there.
+
+During verification the Settings process used 151780 KiB RSS (about **148 MiB**)
+after opening Wi-Fi, Bluetooth and sound. This is more than the Rofi menu while
+open. No persistent Settings autostart was added. Closing the verified Settings
+window ended that process. No GNOME Shell or `gsd-*` settings daemon was started.
+RSS includes shared libraries; it is not private RAM or a guaranteed limit.
+
+Desktop tools now discovers apps using `Gio.AppInfo.get_all()` and desktop-entry
+Settings/System categories. Installed tools with visible, correctly categorized
+`.desktop` entries appear next time it opens: no manual entry, polling or indexer.
+GIO handles localized names, user overrides, visibility, terminal flags and launch
+arguments. The local machine currently exposes 19 installed apps this way,
+including Advanced Network Configuration, Blueman, ARandR, Htop, Volume Control,
+disk utilities, language settings, firmware/software updaters and others.
+Only the i3-specific helper controls remain pinned. Apps without the relevant
+categories do not appear until their desktop metadata is corrected.
 
 ## Installation
 
@@ -92,7 +131,7 @@ those development libraries are unavailable. Nothing changes your theme until
 you choose and apply it in the editor. Some GTK applications need reopening
 to pick up changes when no XSettings daemon is running.
 
-The Bluetooth menu exposes saved devices and power state without background
+The lightweight Bluetooth menu in Desktop tools exposes saved devices and power state without background
 scanning. Use “Pair a new device / advanced settings” to open Blueman and its
 pairing agent. Opening/cancelling the menu never powers off, disconnects, scans,
 changes a power profile or switches displays automatically.
@@ -102,6 +141,8 @@ closed. The existing display watcher still enforces lid safety after changes.
 
 ## Research and source choices
 
+- [Ubuntu Settings](https://help.ubuntu.com/stable/ubuntu-help/prefs.html.en): the unified app already installed on this Ubuntu machine.
+- [XDG desktop entries](https://specifications.freedesktop.org/desktop-entry-spec/latest/recognized-keys.html): automatic discovery and visibility use the standard application catalog.
 - [Rofi](https://github.com/davatorium/rofi): reuse the existing launcher and
   theme system for transient menus.
 - [networkmanager-dmenu](https://github.com/firecat53/networkmanager-dmenu):

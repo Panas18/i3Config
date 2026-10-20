@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=i3 Desktop Tools
+Comment=Discover installed settings applications and i3-specific controls
+Exec=i3-settings tools
+Icon=preferences-desktop
+Terminal=false
+Categories=Settings;

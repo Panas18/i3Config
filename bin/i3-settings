@@ -137,11 +137,11 @@ def power_profiles():
 def shortcuts():
     menu('Keyboard shortcuts', [
         'Super + S                         Quick settings',
-        'Super + Ctrl + S                  All settings',
+        'Super + Ctrl + S                  Ubuntu Settings',
         'Super + Space                     Applications',
         'Super + Tab                       Window switcher',
-        'Super + Ctrl + N                   Network menu',
-        'Super + Ctrl + B                   Bluetooth menu',
+        'Super + Ctrl + N                   Ubuntu Wi-Fi settings',
+        'Super + Ctrl + B                   Ubuntu Bluetooth settings',
         'Super + Ctrl + M                   Audio outputs',
         'Super + Ctrl + W                   Wallpaper',
         'Super + Ctrl + V                   Clipboard history',
@@ -150,11 +150,69 @@ def shortcuts():
     ], 'Shortcut reference · Esc to close')
 
 
+def discovered_settings(apps=None):
+    """Discover installed Settings/System desktop entries via the XDG/GIO catalog."""
+    if apps is None:
+        from gi.repository import Gio
+        apps = Gio.AppInfo.get_all()
+    rows = []
+    seen = set()
+    for app in apps:
+        desktop_id = app.get_id()
+        if not desktop_id or desktop_id in seen:
+            continue
+        seen.add(desktop_id)
+        if desktop_id in ('i3-settings.desktop', 'i3-desktop-tools.desktop', 'org.gnome.Settings.desktop'):
+            continue
+        if not hasattr(app, 'get_categories') or not app.should_show():
+            continue
+        categories = set((app.get_categories() or '').split(';'))
+        if not categories.intersection({'Settings', 'System'}):
+            continue
+        executable = app.get_executable() or ''
+        if Path(executable).name in ('i3-settings', 'i3-ubuntu-settings'):
+            continue
+        rows.append((clean(app.get_display_name()), app))
+    return sorted(rows, key=lambda row: (row[0].casefold(), row[1].get_id()))
+
+
+def tools_menu():
+    # Only i3-specific integrations are pinned; installed apps are discovered.
+    pinned = [
+        ('  Lightweight network menu', [str(BIN/'i3-settings'), 'network']),
+        ('  Lightweight Bluetooth menu', [str(BIN/'i3-settings'), 'bluetooth']),
+        ('  i3 displays & Autorandr layouts', [str(BIN/'i3-settings'), 'displays']),
+        ('  i3 wallpaper', [str(BIN/'i3-wallpaper'), '--choose']),
+        ('  Dunst notifications', [str(BIN/'i3-settings'), 'notifications']),
+        ('  GTK appearance', [str(BIN/'i3-appearance')]),
+        ('  Calendar', [str(BIN/'i3-calendar')]),
+        ('  i3 keyboard shortcuts', [str(BIN/'i3-settings'), 'shortcuts']),
+        ('  Lock, suspend & power', [str(BIN/'i3-power-menu')]),
+    ]
+    if shutil.which('gnome-control-center'):
+        pinned.insert(0, ('  Ubuntu Settings', [str(BIN/'i3-ubuntu-settings')]))
+    pinned = [(label, args) for label, args in pinned if shutil.which(args[0])]
+    installed = discovered_settings()
+    rows = [label for label, _ in pinned] + ['▸  '+label for label, _ in installed]
+    index = menu('Desktop tools', rows,
+                 'Installed settings apps appear automatically · i3-specific tools above')
+    if index is None:
+        return
+    if index < len(pinned):
+        launch(*pinned[index][1])
+    else:
+        from gi.repository import Gio, GLib
+        try:
+            installed[index-len(pinned)][1].launch([], Gio.AppLaunchContext())
+        except GLib.Error as error:
+            subprocess.run(['notify-send', 'Desktop tools', clean(error.message)], check=False)
+
+
 def main():
     os.environ['PATH'] = str(BIN)+os.pathsep+os.environ.get('PATH', '')
     section = sys.argv[1] if len(sys.argv) > 1 else ''
     handlers = {'bluetooth': bluetooth, 'notifications': notifications, 'displays': displays,
-                'power-profiles': power_profiles, 'shortcuts': shortcuts}
+                'power-profiles': power_profiles, 'shortcuts': shortcuts, 'tools': tools_menu}
     if section in handlers:
         handlers[section]()
     elif section == 'network':
@@ -164,29 +222,7 @@ def main():
         else:
             launch('nm-connection-editor')
     else:
-        actions = [
-            ('  Network & Wi-Fi', [str(BIN/'i3-settings'), 'network']),
-            ('  Bluetooth devices', [str(BIN/'i3-settings'), 'bluetooth']),
-            ('  Sound & audio outputs', ['pavucontrol', '--tab=3']),
-            ('  Displays & saved layouts', [str(BIN/'i3-settings'), 'displays']),
-            ('  Appearance · themes, icons & fonts', [str(BIN/'i3-appearance')]),
-            ('  Calendar', [str(BIN/'i3-calendar')]),
-            ('  Wallpaper', [str(BIN/'i3-wallpaper'), '--choose']),
-            ('  Notifications', [str(BIN/'i3-settings'), 'notifications']),
-            ('  Clipboard history', ['copyq', 'toggle']),
-            ('  Screenshot', ['flameshot', 'gui']),
-            ('  Task manager · htop', ['kitty', '--title', 'System monitor', 'htop']),
-            ('  Disk usage', ['baobab']),
-            ('  Keyboard shortcuts', [str(BIN/'i3-settings'), 'shortcuts']),
-            ('  Lock, suspend & power', [str(BIN/'i3-power-menu')]),
-        ]
-        if run('powerprofilesctl', 'get'):
-            actions.insert(6, ('  Power profile', [str(BIN/'i3-settings'), 'power-profiles']))
-        actions = [(label, args) for label, args in actions if shutil.which(args[0])]
-        index = menu('Settings', [label for label, _ in actions],
-                     'Lightweight desktop tools · launched only when needed')
-        if index is not None:
-            launch(*actions[index][1])
+        launch(str(BIN/'i3-ubuntu-settings'), *sys.argv[1:])
 
 
 if __name__ == '__main__':

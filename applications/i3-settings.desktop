@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
-Name=Desktop Settings
-Comment=Lightweight i3 settings and tools
+Name=Ubuntu Settings (i3)
+Comment=Open Ubuntu Settings in the i3 session
 Exec=i3-settings
 Icon=preferences-system
 Terminal=false

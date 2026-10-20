@@ -1,6 +1,6 @@
 (defwindow control-center
   :monitor "<primary>"
-  :geometry (geometry :x "-12px" :y "58px" :width "340px" :height "296px" :anchor "top right")
+  :geometry (geometry :x "-12px" :y "58px" :width "340px" :height "356px" :anchor "top right")
   :stacking "fg" :windowtype "dialog" :wm-ignore false
   (box :class "panel" :orientation "v" :space-evenly false :spacing 12
     (box :space-evenly false
@@ -19,7 +19,12 @@
     (button :class "settings" :timeout "10s" :onclick "~/.local/bin/i3-center launch settings"
       (box :space-evenly false :spacing 16
         (label :class "icon" :text "")
-        (label :text "All settings" :hexpand true :xalign 0)
+        (label :text "Ubuntu Settings" :hexpand true :xalign 0)
+        (label :class "arrow" :text "›")))
+    (button :class "tools" :timeout "10s" :onclick "~/.local/bin/i3-center launch tools"
+      (box :space-evenly false :spacing 16
+        (label :class "icon" :text "")
+        (label :text "Desktop tools" :hexpand true :xalign 0)
         (label :class "arrow" :text "›")))
     (button :class "power" :timeout "10s" :onclick "~/.local/bin/i3-center launch power"
       (box :space-evenly false :spacing 16

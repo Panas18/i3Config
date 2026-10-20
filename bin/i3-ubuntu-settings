@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+"""Launch Ubuntu Settings on demand with a process-local GNOME compatibility hint."""
+import os
+from pathlib import Path
+import shutil
+import sys
+
+
+def launch_environment(environment):
+    child = dict(environment)
+    child['XDG_CURRENT_DESKTOP'] = 'GNOME'
+    # The static settings UI does not need GTK4's GPU renderer on this Intel laptop.
+    child.setdefault('GSK_RENDERER', 'cairo')
+    return child
+
+
+def main():
+    if not shutil.which('gnome-control-center'):
+        helper = str(Path.home()/'.local/bin/i3-settings')
+        os.execv(helper, [helper, 'tools'])
+    args = sys.argv[1:] or ['wifi']
+    os.execvpe('gnome-control-center', ['gnome-control-center', *args], launch_environment(os.environ))
+
+
+if __name__ == '__main__':
+    main()

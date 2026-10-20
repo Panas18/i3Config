@@ -5,7 +5,7 @@ source_root=${1:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}
 share_root="${XDG_DATA_HOME:-$HOME/.local/share}"
 config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
 mkdir -p "$HOME/.local/bin" "$share_root/i3config/vendor/networkmanager-dmenu" "$config_root/networkmanager-dmenu" "$config_root/rofi"
-install -m755 "$source_root/bin/i3-settings" "$source_root/bin/i3-calendar" "$HOME/.local/bin/"
+install -m755 "$source_root/bin/i3-settings" "$source_root/bin/i3-calendar" "$source_root/bin/i3-ubuntu-settings" "$HOME/.local/bin/"
 install -m755 "$source_root/vendor/networkmanager-dmenu/networkmanager_dmenu" "$share_root/i3config/vendor/networkmanager-dmenu/"
 install -m644 "$source_root/vendor/networkmanager-dmenu/LICENSE.txt" "$source_root/vendor/networkmanager-dmenu/UPSTREAM.md" "$share_root/i3config/vendor/networkmanager-dmenu/"
 # Preserve existing preferences. Explicit configuration updates can be copied later.
@@ -42,5 +42,5 @@ if ! command -v lxappearance >/dev/null; then
 fi
 install -m755 "$source_root/bin/i3-appearance" "$HOME/.local/bin/"
 mkdir -p "$share_root/applications"
-install -m644 "$source_root/applications/i3-settings.desktop" "$share_root/applications/"
-echo 'Installed on-demand settings, network menu and LXAppearance. No new background services.'
+install -m644 "$source_root/applications/i3-settings.desktop" "$source_root/applications/i3-desktop-tools.desktop" "$share_root/applications/"
+echo 'Installed Ubuntu Settings integration, automatic desktop tools and on-demand helpers. No new background services.'

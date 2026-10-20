@@ -6,6 +6,8 @@ import io
 import os
 from pathlib import Path
 import tempfile
+import subprocess
+import sys
 import unittest
 from unittest.mock import patch
 
@@ -104,12 +106,78 @@ class SettingsTests(unittest.TestCase):
             run.assert_called_once_with('dunstctl', 'is-paused')
 
     def test_cancelled_hub_does_not_launch_tool(self):
-        with patch('sys.argv', ['i3-settings']), \
+        with patch('sys.argv', ['i3-settings', 'tools']), \
              patch.object(self.settings, 'run', return_value='balanced'), \
              patch.object(self.settings, 'menu', return_value=None), \
+             patch.object(self.settings, 'discovered_settings', return_value=[]), \
              patch.object(self.settings, 'launch') as launch:
             self.settings.main()
             launch.assert_not_called()
+
+
+class UbuntuSettingsTests(unittest.TestCase):
+    def test_compatibility_environment_is_local_and_keeps_existing_renderer_choice(self):
+        wrapper = helper('i3-ubuntu-settings')
+        original = {'XDG_CURRENT_DESKTOP': 'i3', 'DISPLAY': ':0'}
+        child = wrapper.launch_environment(original)
+        self.assertEqual(original['XDG_CURRENT_DESKTOP'], 'i3')
+        self.assertEqual(child['XDG_CURRENT_DESKTOP'], 'GNOME')
+        self.assertEqual(child['GSK_RENDERER'], 'cairo')
+        self.assertEqual(wrapper.launch_environment({'GSK_RENDERER': 'gl'})['GSK_RENDERER'], 'gl')
+
+    def test_default_settings_launches_unified_app(self):
+        settings = helper('i3-settings')
+        with patch('sys.argv', ['i3-settings']), patch.object(settings, 'launch') as launch:
+            settings.main()
+        launch.assert_called_once_with(str(settings.BIN/'i3-ubuntu-settings'))
+
+    def test_missing_unified_app_falls_back_without_recursion(self):
+        wrapper = helper('i3-ubuntu-settings')
+        with patch.object(wrapper.shutil, 'which', return_value=None), \
+             patch.object(wrapper.os, 'execv', side_effect=RuntimeError('exec')) as execute:
+            with self.assertRaises(RuntimeError):
+                wrapper.main()
+        self.assertEqual(execute.call_args.args[1][-1], 'tools')
+
+    def test_desktop_discovery_honors_visibility_and_detects_new_tools(self):
+        settings = helper('i3-settings')
+        class App:
+            def __init__(self, name, categories='Settings;', visible=True, executable='example'):
+                self.name, self.categories, self.visible, self.executable = name, categories, visible, executable
+            def get_id(self): return self.name+'.desktop'
+            def get_display_name(self): return self.name
+            def get_categories(self): return self.categories
+            def should_show(self): return self.visible
+            def get_executable(self): return self.executable
+        apps = [App('Existing'), App('Hidden', visible=False), App('Game', categories='Game;'),
+                App('Recursive', executable='i3-settings'), App('Existing')]
+        self.assertEqual([name for name, _ in settings.discovered_settings(apps)], ['Existing'])
+        apps.append(App('Newly installed'))
+        self.assertEqual([name for name, _ in settings.discovered_settings(apps)], ['Existing', 'Newly installed'])
+
+
+    @unittest.skipUnless(importlib.util.find_spec('gi'), 'GIO integration requires PyGObject')
+    def test_real_xdg_catalog_updates_and_honors_user_hidden_override(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            user = root/'user/applications'
+            system = root/'system/applications'
+            user.mkdir(parents=True)
+            system.mkdir(parents=True)
+            environment = {**os.environ, 'XDG_DATA_HOME': str(user.parent),
+                           'XDG_DATA_DIRS': str(system.parent), 'XDG_CURRENT_DESKTOP': 'i3'}
+            probe = system/'autodetected.desktop'
+            code = ("import importlib.machinery, json; "
+                    "m=importlib.machinery.SourceFileLoader('probe', " + repr(str(ROOT/'bin/i3-settings')) + ").load_module(); "
+                    "print(json.dumps([a.get_id() for _, a in m.discovered_settings()]))")
+            def catalog():
+                return subprocess.check_output([sys.executable, '-c', code], env=environment, text=True).strip()
+            self.assertEqual(catalog(), '[]')
+            probe.write_text('[Desktop Entry]\nType=Application\nName=Automatically discovered\n'
+                             'Exec=/usr/bin/true\nCategories=Settings;\n')
+            self.assertIn('autodetected.desktop', catalog())
+            (user/probe.name).write_text('[Desktop Entry]\nHidden=true\n')
+            self.assertEqual(catalog(), '[]')
 
 
 class CalendarTests(unittest.TestCase):

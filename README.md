@@ -138,7 +138,7 @@ Super+Ctrl+V opens CopyQ clipboard history; Super+V keeps its i3 split action.
 Super+S toggles the Eww control center. CopyQ is started at login; Eww starts
 on demand through `systemd/user/i3-eww.service` (copy it to
 `~/.config/systemd/user/` and run `systemctl --user daemon-reload`). Install CopyQ and build Eww with X11 support if unavailable in apt.
-The quick-settings panel contains Network, Bluetooth, All settings and Power. It closes
+The quick-settings panel contains Network, Bluetooth, Ubuntu Settings, Desktop tools and Power. It closes
 when another window or workspace gains focus, and closes before launching a tool.
 `i3-center-watch` subscribes to i3 events while the panel is open; it does not poll
 in the background. Copy this helper along with `i3-center`.
@@ -227,14 +227,28 @@ Edit `polybar/config.ini` for colors and modules, `bin/i3-polybar` for geometry,
 and `eww/eww.scss` for quick-settings styling. After copying changes into the
 runtime directories, restart `i3-polybar.service` and run `eww reload`.
 
-## Lightweight settings and calendar
+## Ubuntu Settings, desktop tools and calendar
 
-Super+S opens quick settings. **All settings**, **Super+Ctrl+S**, or the
-**Desktop Settings** application opens the searchable Mocha settings hub.
-Network/Bluetooth buttons and Super+Ctrl+N/B use the matching menus. Click the
-clock for a local calendar with month arrows, PageUp/PageDown, date selection
-and Today. Escape or outside focus closes it. It runs only while visible and
-uses GTK3 already present on this machine; no accounts, sync or extra service.
+Super+S opens quick settings. **Ubuntu Settings**, **Super+Ctrl+S**, or the
+**Ubuntu Settings (i3)** application opens the installed `gnome-control-center`.
+Network/Bluetooth buttons and Super+Ctrl+N/B open its Wi-Fi/Bluetooth panels.
+The compatibility hint `XDG_CURRENT_DESKTOP=GNOME` applies only to this app;
+the session stays i3. GTK4 uses Cairo rendering unless you explicitly configured
+a renderer, so this static UI does not require an extra GPU renderer.
 
-The researched feature list, resource decisions, installation steps and source
-links are in [docs/lightweight-desktop.md](docs/lightweight-desktop.md).
+**Desktop tools** (or `i3-settings tools`) retains i3-specific display profiles,
+wallpaper, Dunst, appearance and shortcuts. It automatically discovers installed
+Settings/System applications through GIO/XDG desktop entries on every opening.
+Installing another correctly categorized settings app adds it automatically;
+uninstalling it removes it. No menu-file edit or background indexer is needed.
+Hidden apps and desktop restrictions are respected, as are desktop-entry launch
+arguments, terminal requirements and D-Bus activation. GNOME-only panels such as
+displays, notifications, wallpaper and i3 shortcuts can still require the desktop
+tools; starting the Settings app does not supply the full GNOME backend integration.
+
+Click the clock for a local calendar with month arrows, PageUp/PageDown, date
+selection and Today. Escape or outside focus closes it. It runs only while
+visible and uses the existing GTK3 libraries, with no accounts or sync service.
+
+The feature list, compatibility notes, resource measurements, installation steps
+and source links are in [docs/lightweight-desktop.md](docs/lightweight-desktop.md).

@@ -17,9 +17,10 @@ done
 $ready || { notify-send 'Control center' 'Widget service did not start.'; exit 1; }
 if [[ ${1:-} == launch ]]; then
   case ${2:-} in
-    network) command="$HOME/.local/bin/i3-settings network" ;;
-    bluetooth) command="$HOME/.local/bin/i3-settings bluetooth" ;;
+    network) command="$HOME/.local/bin/i3-ubuntu-settings wifi" ;;
+    bluetooth) command="$HOME/.local/bin/i3-ubuntu-settings bluetooth" ;;
     settings) command="$HOME/.local/bin/i3-settings" ;;
+    tools) command="$HOME/.local/bin/i3-settings tools" ;;
     power) command="$HOME/.local/bin/i3-power-menu" ;;
     *) exit 2 ;;
   esac
