@@ -31,6 +31,7 @@ def meter(percent):
     filled = max(0, min(4, round(percent/25)))
     return '▰'*filled + '▱'*(4-filled)
 
+compact = os.environ.get('BAR_COMPACT') == '1'
 name = os.environ.get('BLOCK_NAME', '')
 click = os.environ.get('BLOCK_BUTTON', '')
 if click == '1':
@@ -62,12 +63,12 @@ elif name == 'bluetooth':
         print('🔵' + (str(len(devices)) if devices else '✓'))
 elif name == 'volume':
     info = run(str(Path.home()/'.local/bin/i3-audio'), 'status')
-    if not info: print('🔊–')
-    elif 'MUTED' in info: print('🔇')
+    if not info: print(' –' if compact else '🔊–')
+    elif 'MUTED' in info: print(' mute' if compact else '🔇')
     else:
         volume = float(info.split()[1])*100
         icon = '🔈' if volume < 1 else '🔉' if volume <= 50 else '🔊'
-        print(f'{icon}{volume:.0f}%')
+        print(f' {volume:.0f}%' if compact else f'{icon}{volume:.0f}%')
 elif name == 'brightness':
     active_internal = False
     current_external = False
@@ -85,15 +86,16 @@ elif name == 'brightness':
         elif current_external and line.strip().startswith('Brightness:'):
             external_levels.append(float(line.split(':', 1)[1])*100)
     if not active_internal and external_levels:
-        print(f'☀{sum(external_levels)/len(external_levels):.0f}%')
+        icon = ' ' if compact else '☀'
+        print(f'{icon}{sum(external_levels)/len(external_levels):.0f}%')
     else:
         info = run('brightnessctl', '-c', 'backlight', '-m')
-        print('☀' + (info.split(',')[3] if info else '–'))
+        print((' ' if compact else '☀') + (info.split(',')[3] if info else '–'))
 elif name == 'memory':
     mem = dict(line.split(':', 1) for line in read('/proc/meminfo').splitlines())
     total = int(mem['MemTotal'].split()[0]); available = int(mem['MemAvailable'].split()[0])
     used = (total-available)/total*100
-    print(f'🧠{meter(used)}')
+    print(f' {(total-available)/1048576:.1f}G' if compact else f'🧠{meter(used)}')
 elif name == 'disk':
     s = os.statvfs(str(Path.home()))
     used = (s.f_blocks-s.f_bfree)/s.f_blocks*100
@@ -112,7 +114,7 @@ elif name in ('cpu', 'bandwidth'):
         total, idle = sum(values), values[3] + values[4]
         delta = total - old.get('total', total)
         busy = 100 * (1 - (idle-old.get('idle', idle))/delta) if delta > 0 else 0
-        print(f'⚙{meter(busy)}')
+        print(f' {busy:.0f}%' if compact else f'⚙{meter(busy)}')
         data = {'total': total, 'idle': idle}
     else:
         routes = [line.split() for line in read('/proc/net/route').splitlines()[1:]]
@@ -138,11 +140,14 @@ elif name == 'battery':
         capacity = read(battery/'capacity')
         status = read(battery/'status')
         icon = '🔌' if status in ('Charging', 'Full') else '🪫' if capacity.isdigit() and int(capacity) <= 20 else '🔋'
-        labels.append(f'{icon}{capacity}%')
-    print(' '.join(labels) or '🔌')
+        if compact:
+            icon = '' if status in ('Charging', 'Full') else '' if capacity.isdigit() and int(capacity) <= 20 else ''
+        labels.append(f'{icon} {capacity}%' if compact else f'{icon}{capacity}%')
+    print(' '.join(labels) or (' AC' if compact else '🔌'))
 elif name == 'temperature':
     temps = []
     for p in glob.glob('/sys/class/thermal/thermal_zone*/temp'):
         value = read(p)
         if value.isdigit() and 0 < int(value) < 150000: temps.append(int(value)/1000)
-    print(f'🌡{max(temps):.0f}°C' if temps else '🌡N/A')
+    icon = ' ' if compact else '🌡'
+    print(f'{icon}{max(temps):.0f}°' if temps else f'{icon}–')

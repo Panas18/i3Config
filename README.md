@@ -137,7 +137,18 @@ Super+Ctrl+V opens CopyQ clipboard history; Super+V keeps its i3 split action.
 Super+S toggles the Eww control center. CopyQ is started at login; Eww starts
 on demand through `systemd/user/i3-eww.service` (copy it to
 `~/.config/systemd/user/` and run `systemctl --user daemon-reload`). Install CopyQ and build Eww with X11 support if unavailable in apt.
-The control center uses the same audio/brightness helpers as the media keys.
+The quick-settings panel contains only Network, Bluetooth and Power. It closes
+when another window or workspace gains focus, and closes before launching a tool.
+`i3-center-watch` subscribes to i3 events while the panel is open; it does not poll
+in the background. Copy this helper along with `i3-center`.
+
+Picom uses the accelerated GLX backend with subtle shadows, short fades and
+10px window corners. `i3-picom.service` starts with the session and restarts on
+failure. Copy the service to `~/.config/systemd/user/`, reload systemd, stop any
+old manually launched Picom instance, and run `systemctl --user start i3-picom`.
+Use `journalctl --user -u i3-picom -b` for diagnostics. If another graphics driver
+has GLX problems, change `backend` to `"xrender"` in `picom/picom.conf` and restart
+the service. Fullscreen unredirection is disabled to keep compositing consistent.
 
 Eww build used: official tag `v0.6.0`, with the locked `time` dependency
 updated from 0.3.34 to 0.3.36 for compatibility with the installed Rust compiler.
@@ -152,17 +163,35 @@ does not trigger a second daemon.
 
 ## Polybar and display profiles
 
-Install `polybar` (3.7 or newer) and `autorandr`. Copy `polybar/` to
+Install `polybar` (3.7 or newer), `autorandr`, `xdotool` and Python 3. Copy `polybar/` to
 `~/.config/polybar/`, all `bin/i3-*` helpers to `~/.local/bin/`, and the user
 services to `~/.config/systemd/user/`. Run `systemctl --user daemon-reload`.
 The session starts `i3-polybar.service`; the i3bar block is removed. The retained
 `i3blocks/` config is an optional fallback rather than a second running panel.
-Polybar uses Fira Code, Noto Color Emoji, DejaVu Sans and FontAwesome.
+Polybar uses Fira Code, DejaVu Sans and FontAwesome (monochrome icons).
 
-The panel preserves the status order, clickable audio/network/Bluetooth/calendar
-controls and workspace navigation. Scroll sound/brightness to change levels;
-right-click sound to mute. The ☰ button opens the control center; right-click
-opens the power menu. The tray includes nm-applet and Blueman.
+The panel uses three separate rounded Mocha islands, with 12px gutters:
+
+- **Left:** application launcher, i3 workspaces and the active window title.
+- **Center:** previous/play-pause/next, a bounded MPRIS track title and date/time.
+- **Right:** CPU, memory, temperature, brightness, volume, battery and quick settings.
+
+Wi-Fi names, Bluetooth and the tray are removed from the bar. Network and Bluetooth
+settings live in quick settings (sliders icon or Super+S). Power actions are there
+too, with the existing confirmation for shutdown/reboot/logout.
+Scroll sound/brightness to change levels; right-click sound to mute; left-click
+sound to choose an output. Click the date to toggle its detail. The launcher opens
+apps on left click and the window switcher on right click. Music uses `playerctl`;
+when no MPRIS player is running it displays “Nothing playing”. Track metadata is
+sanitized before Polybar renders it.
+
+`i3-polybar` calculates widths from the primary monitor and supervises the whole
+group. A transparent dock reserves one 56px row; the three visible bars use
+`override-redirect` so i3 does not stack them. The transparent reservation dock
+has an empty X11 input shape so clicks reach the visible islands. On screens narrower than 1500px,
+the brightness readout is omitted and titles are shortened; hardware brightness
+keys still work. Under 1200px, the right island keeps temperature, sound, battery
+and settings. The display watcher restarts the group when outputs change.
 
 Save each desired monitor arrangement with `autorandr --save PROFILE_NAME`.
 The current machine's docked arrangement is saved locally as `docked`.
@@ -172,7 +201,6 @@ runs `autorandr --change` once when connected outputs change, then enforces
 lid safety and refreshes Polybar/wallpaper. Avoid adding a second autorandr
 polling loop. Unplug/open-lid handling still restores the laptop display.
 
-Polybar appearance uses a 40px inset panel with rounded corners, grouped
-status tiles and an accented active workspace. Left-click the rocket to launch
-apps; right-click it for power actions. The sliders button opens the control
-center. Edit `polybar/config.ini` to change colors, spacing or module styling.
+Edit `polybar/config.ini` for colors and modules, `bin/i3-polybar` for geometry,
+and `eww/eww.scss` for quick-settings styling. After copying changes into the
+runtime directories, restart `i3-polybar.service` and run `eww reload`.

@@ -6,4 +6,4 @@ PartOf=graphical-session.target
 ExecStart=%h/.local/bin/i3-polybar
 Restart=on-failure
 RestartSec=2
-TimeoutStopSec=3
+TimeoutStopSec=8

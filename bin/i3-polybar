@@ -1,10 +1,83 @@
 #!/usr/bin/env bash
 set -euo pipefail
 export PATH="$HOME/.local/bin:$PATH"
-# Use the primary monitor, falling back to the first active output.
-MONITOR=$(polybar --list-monitors | awk -F: '/primary/{print $1; exit}')
-if [[ -z $MONITOR ]]; then
-  MONITOR=$(polybar --list-monitors | head -n 1 | cut -d: -f1)
+# Supervise all three islands as one service, including display-change restarts.
+outputs=$(polybar --list-monitors)
+output=$(awk '/primary/{print; exit}' <<< "$outputs")
+[[ -n $output ]] || output=$(head -n 1 <<< "$outputs")
+[[ -n $output ]] || { echo 'No active monitor for Polybar' >&2; exit 1; }
+export MONITOR=${output%%:*}
+geometry=${output#*: }
+width=${geometry%%x*}
+# Keep the media island on the physical center. Wider screens gain breathing room.
+export CENTER_WIDTH=$((width * 38 / 100))
+((CENTER_WIDTH <= 680)) || CENTER_WIDTH=680
+export CENTER_X=$(((width - CENTER_WIDTH) / 2))
+export LEFT_WIDTH=$((CENTER_X - 24))
+export RIGHT_X=$((CENTER_X + CENTER_WIDTH + 12))
+export RIGHT_WIDTH=$((width - RIGHT_X - 12))
+export MEDIA_CHARS=$((CENTER_WIDTH > 600 ? 27 : CENTER_WIDTH > 500 ? 20 : 12))
+export WINDOW_CHARS=$((width < 1500 ? 12 : 20))
+export STATUS_MODULES='cpu memory temperature brightness volume battery divider controls'
+if ((width < 1500)); then
+  STATUS_MODULES='cpu memory temperature volume battery divider controls'
 fi
-export MONITOR
-exec polybar --reload --config="$HOME/.config/polybar/config.ini" main
+if ((width < 1200)); then
+  STATUS_MODULES='temperature volume battery controls'
+  WINDOW_CHARS=6
+fi
+pids=()
+cleanup() { trap - EXIT; kill "${pids[@]}" 2>/dev/null || true; wait || true; }
+trap cleanup EXIT
+trap 'exit 0' TERM INT
+for bar in reserve workspaces media status; do
+  reload=()
+  [[ $bar == reserve ]] || reload=(--reload)
+  polybar "${reload[@]}" --config="$HOME/.config/polybar/config.ini" "$bar" &
+  pids+=("$!")
+done
+# The transparent i3 dock must not intercept clicks intended for the islands.
+# Give only its X11 input shape an empty region (bounding/strut stay intact).
+python3 - <<'PYTHON'
+import ctypes as c
+import ctypes.util
+import subprocess
+import time
+for _ in range(40):
+    found = subprocess.run(['xdotool', 'search', '--name', '^polybar-reserve_'],
+                           capture_output=True, text=True)
+    if found.stdout.strip():
+        break
+    time.sleep(0.05)
+else:
+    raise SystemExit('Polybar reservation window did not appear')
+x11 = c.CDLL(ctypes.util.find_library('X11'))
+xext = c.CDLL(ctypes.util.find_library('Xext'))
+x11.XOpenDisplay.restype = c.c_void_p
+x11.XOpenDisplay.argtypes = [c.c_char_p]
+x11.XCloseDisplay.argtypes = [c.c_void_p]
+x11.XQueryTree.argtypes = [c.c_void_p, c.c_ulong, c.POINTER(c.c_ulong),
+    c.POINTER(c.c_ulong), c.POINTER(c.POINTER(c.c_ulong)), c.POINTER(c.c_uint)]
+x11.XFree.argtypes = [c.c_void_p]
+xext.XShapeCombineRectangles.argtypes = [c.c_void_p, c.c_ulong, c.c_int,
+    c.c_int, c.c_int, c.c_void_p, c.c_int, c.c_int, c.c_int]
+display = x11.XOpenDisplay(None)
+if not display:
+    raise SystemExit('Cannot open X11 display')
+for window in found.stdout.split():
+    window = int(window)
+    root, parent, count = c.c_ulong(), c.c_ulong(), c.c_uint()
+    children = c.POINTER(c.c_ulong)()
+    x11.XQueryTree(display, window, c.byref(root), c.byref(parent),
+                   c.byref(children), c.byref(count))
+    if children:
+        x11.XFree(children)
+    xext.XShapeCombineRectangles(display, window, 2, 0, 0, None, 0, 0, 0)
+    # i3 reparents managed docks into a frame that also receives input.
+    if parent.value and parent.value != root.value:
+        xext.XShapeCombineRectangles(display, parent.value, 2, 0, 0, None, 0, 0, 0)
+x11.XCloseDisplay(display)
+PYTHON
+# Restart the complete group if any island exits unexpectedly.
+wait -n "${pids[@]}" || true
+exit 1

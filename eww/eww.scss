@@ -1,7 +1,11 @@
-* { all: unset; font-family: Sans; font-size: 14px; }
-.panel { background: #1e1e2e; color: #cdd6f4; padding: 20px; border: 1px solid #45475a; border-radius: 14px; }
-.heading { font-size: 18px; font-weight: bold; }
-button { background: #313244; padding: 10px 14px; border-radius: 8px; }
-button:hover { background: #45475a; color: #89b4fa; }
-progressbar trough { background: #313244; border-radius: 4px; min-height: 8px; }
-progressbar progress { background: #89b4fa; border-radius: 4px; min-height: 8px; }
+* { all: unset; font-family: "DejaVu Sans", "FontAwesome"; font-size: 13px; }
+.panel { background: #1e1e2e; color: #cdd6f4; padding: 18px; border: 1px solid #45475a; border-radius: 14px; }
+.heading { font-size: 16px; font-weight: bold; }
+button { background: #262637; padding: 12px 14px; border-radius: 9px; border: 1px solid #313244; }
+button:hover, button:focus { background: #313244; border-color: #89b4fa; }
+.close { padding: 0 6px; background: transparent; border: none; color: #9399b2; font-size: 22px; }
+.icon { font-family: "FontAwesome"; font-size: 17px; min-width: 20px; }
+.network .icon { color: #89b4fa; }
+.bluetooth .icon { color: #cba6f7; }
+.power .icon { color: #f38ba8; }
+.arrow { color: #6c7086; font-size: 20px; }

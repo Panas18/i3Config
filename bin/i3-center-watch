@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+"""Dismiss the X11 Eww panel on i3 focus/workspace changes, without polling."""
+import fcntl
+import json
+import os
+from pathlib import Path
+import socket
+import struct
+import subprocess
+import time
+
+
+def nodes(node):
+    yield node
+    for child in node.get('nodes', []) + node.get('floating_nodes', []):
+        yield from nodes(child)
+
+
+def close_panel():
+    subprocess.run(['eww', 'close', 'control-center'], capture_output=True, timeout=5)
+
+
+def main():
+    # An older watcher exits when its window closes; serialize overlapping opens.
+    lock = open(Path(os.environ.get('XDG_RUNTIME_DIR', '/tmp')) /
+                f'i3-center-watch-{os.getuid()}.lock', 'w')
+    fcntl.flock(lock, fcntl.LOCK_EX)
+    ipc = socket.socket(socket.AF_UNIX)
+    ipc.connect(subprocess.check_output(['i3', '--get-socketpath'], text=True).strip())
+
+    def send(kind, data):
+        payload = json.dumps(data).encode()
+        ipc.sendall(b'i3-ipc' + struct.pack('<II', len(payload), kind) + payload)
+
+    def receive():
+        def read(size):
+            data = b''
+            while len(data) < size:
+                chunk = ipc.recv(size-len(data))
+                if not chunk:
+                    raise EOFError
+                data += chunk
+            return data
+        header = read(14)
+        length, kind = struct.unpack('<II', header[6:])
+        return kind, json.loads(read(length))
+
+    # Subscribe before inspecting focus so a quick outside click cannot be missed.
+    send(2, ['window', 'workspace', 'shutdown'])
+    receive()
+    panel = None
+    # Eww acknowledges open before GTK has mapped and i3 has focused the window.
+    for _ in range(20):
+        tree = json.loads(subprocess.check_output(['i3-msg', '-t', 'get_tree']))
+        panel = next((n for n in nodes(tree) if n.get('name') == 'Eww - control-center'), None)
+        if panel is not None and panel.get('focused'):
+            break
+        time.sleep(0.05)
+    if panel is None:
+        return
+    panel_id = panel['id']
+    if not panel.get('focused'):
+        close_panel()
+        return
+    try:
+        while True:
+            kind, event = receive()
+            change = event.get('change')
+            if kind == 0x80000006:  # session shutdown
+                return
+            if kind == 0x80000003:
+                container = event.get('container', {})
+                if change == 'close' and container.get('id') == panel_id:
+                    return
+                if change == 'focus' and container.get('id') != panel_id:
+                    close_panel()
+                    return
+            if kind == 0x80000000 and change == 'focus':
+                close_panel()
+                return
+    finally:
+        ipc.close()
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, EOFError, subprocess.SubprocessError):
+        pass  # Session teardown must not leave a failing background process.

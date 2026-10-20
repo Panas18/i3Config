@@ -19,19 +19,15 @@ if [[ ${1:-} == launch ]]; then
   case ${2:-} in
     network) command='nm-connection-editor' ;;
     bluetooth) command='blueman-manager' ;;
-    audio) command='pavucontrol --tab=3' ;;
-    wallpaper) command="$HOME/.local/bin/i3-wallpaper --choose" ;;
     power) command="$HOME/.local/bin/i3-power-menu" ;;
     *) exit 2 ;;
   esac
   eww close control-center 2>/dev/null || true
-  eww update center-visible=false
   exec i3-msg "exec --no-startup-id $command"
 fi
 if [[ ${1:-} == close ]] || eww active-windows | grep -q '^control-center:'; then
   eww close control-center 2>/dev/null || true
-  eww update center-visible=false
 else
   eww open control-center
-  eww update center-visible=true
+  "$HOME/.local/bin/i3-center-watch" >/dev/null 2>&1 &
 fi

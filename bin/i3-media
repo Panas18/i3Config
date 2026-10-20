@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+"""Bounded MPRIS metadata; never allow track titles to inject Polybar tags."""
+import os
+import subprocess
+import sys
+
+
+def player(*args):
+    try:
+        result = subprocess.run(['playerctl', *args], capture_output=True,
+                                text=True, timeout=1)
+        return result.stdout.strip() if result.returncode == 0 else ''
+    except (OSError, subprocess.TimeoutExpired):
+        return ''
+
+
+status = player('status')
+if sys.argv[1:] == ['icon']:
+    print('' if status == 'Playing' else '')
+else:
+    title = player('metadata', '--format', '{{artist}} — {{title}}') if status else ''
+    title = title.strip(' —') or ('Audio ready' if status else 'Nothing playing')
+    title = ' '.join(title.replace('%', '％').split())
+    limit = max(8, min(80, int(os.environ.get('MEDIA_CHARS', '27'))))
+    print(title if len(title) <= limit else title[:limit-1] + '…')
