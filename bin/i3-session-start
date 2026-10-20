@@ -6,6 +6,10 @@ exec >> "$logdir/session.log" 2>&1
 echo "Session started $(date -Is)"
 dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP
 start() { pgrep -u "$UID" -f "^$1( |$)" >/dev/null || "$@" & }
+# Refresh installed user units without restarting an existing service.
+systemctl --user daemon-reload
+# Generate hardware-specific profiles on this machine, never copy another PC's EDIDs.
+"$HOME/.local/bin/i3-autorandr-setup" || true
 systemctl --user start i3-displays.service i3-polybar.service i3-picom.service
 start nm-applet
 start blueman-applet

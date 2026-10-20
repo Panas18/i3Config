@@ -1,0 +1,88 @@
+# stage|package|purpose
+# Names are resolved by APT for the target Ubuntu release and CPU architecture.
+i3|i3-wm|X11 window manager and login-session entry
+i3|i3blocks|Optional fallback status bar configuration
+i3|i3lock|Screen locking
+i3|xss-lock|Lock before idle/suspend
+i3|xserver-xorg|Xorg server and standard input/display support
+i3|x11-utils|xkill and X11 window diagnostics
+i3|x11-xserver-utils|xrandr and xset helpers
+i3|xinput|Touchpad configuration
+i3|dbus-x11|X11 D-Bus session integration
+i3|policykit-1-gnome|Graphical authentication agent
+i3|python3|Runtime for desktop helpers
+i3|python3-pil|Wallpaper previews and lock backgrounds
+i3|util-linux|flock and systemd-inhibit support
+i3|procps|Process utilities used by startup helpers
+i3|curl|HTTPS client for shell/editor integrations
+i3|git|Versioned source downloads
+i3|ca-certificates|TLS trust for downloads
+polybar|polybar|Three-island desktop bar
+polybar|xdotool|X11 bar input regions and window helpers
+polybar|libx11-6|X11 runtime library
+polybar|libxext6|X11 shape extension for click-through spacer
+polybar|libxi6|X11 input support
+polybar|fonts-firacode|Terminal and bar font
+polybar|fonts-font-awesome|Bar and settings icons
+polybar|fonts-dejavu-core|UI and fallback glyphs
+polybar|fonts-noto-color-emoji|Optional fallback status icons
+kitty|kitty|X11 terminal emulator
+tmux|tmux|Terminal multiplexer
+tmux|xclip|X11 clipboard integration
+shell|zsh|Kitty's configured interactive shell
+desktop|rofi|Application and settings menus
+desktop|dunst|Notification server
+desktop|picom|Compositing and shadows
+desktop|autorandr|Machine-local display profiles
+desktop|arandr|On-demand display arrangement
+desktop|feh|Wallpaper restoration
+desktop|xdg-utils|Default-application and URL helpers
+desktop|zenity|Calendar click in the optional i3blocks fallback
+desktop|libnotify-bin|notify-send and notification integration
+desktop|brightnessctl|Laptop backlight controls
+desktop|playerctl|MPRIS music controls
+desktop|network-manager|Network service and nmcli
+desktop|network-manager-gnome|Network editor and authentication applet
+desktop|bluez|Bluetooth service and bluetoothctl
+desktop|blueman|Bluetooth UI and pairing agent
+desktop|pipewire|Audio server
+desktop|libspa-0.2-bluetooth|PipeWire Bluetooth audio support
+desktop|pipewire-pulse|PulseAudio API compatibility for PipeWire
+desktop|wireplumber|PipeWire session manager and wpctl
+desktop|pulseaudio-utils|pactl used by audio routing helper
+desktop|pavucontrol|On-demand audio routing UI
+desktop|copyq|Clipboard history
+desktop|flameshot|Screenshot selection
+desktop|nautilus|File-manager keyboard shortcut
+desktop|ranger|Terminal file-manager shortcut
+desktop|htop|On-demand process monitor
+desktop|baobab|On-demand disk usage UI
+desktop|gnome-disk-utility|On-demand disk tools
+desktop|gnome-control-center|Unified Ubuntu Settings application
+desktop|lxappearance|On-demand GTK appearance editor
+desktop|python3-gi|GIO desktop discovery and GTK bindings
+desktop|python3-dbus|Bluetooth D-Bus access
+desktop|python3-gi-cairo|GTK calendar drawing support
+desktop|gir1.2-gtk-3.0|GTK3 calendar introspection
+desktop|gir1.2-nm-1.0|NetworkManager menu introspection
+desktop|libgl1-mesa-dri|Standard Mesa graphics drivers
+desktop|mesa-utils|Optional GLX diagnostics
+eww|build-essential|Native Eww compilation
+eww|pkg-config|Native library discovery
+eww|rustc|Ubuntu's native Rust compiler
+eww|cargo|Rust dependency fetch and build
+eww|libgtk-3-dev|GTK3 build headers
+eww|libdbusmenu-gtk3-dev|Eww menu build headers
+eww|libxcb-randr0-dev|X11 monitor build headers
+eww|libx11-dev|X11 build headers
+eww|libxi-dev|X11 input build headers
+editor|neovim|Optional editor (requires version 0.11 or newer)
+editor|nodejs|Optional JS/TS language-server runtime
+editor|npm|Optional editor language-tool installation
+editor|python3-venv|Optional Python language-tool environments
+editor|ripgrep|Optional editor text search
+editor|fd-find|Optional editor file search
+editor|unzip|Optional editor tool archives
+editor|clangd|Optional C/C++ language server
+editor|clang-format|Optional C/C++ formatter
+editor|golang-go|Optional Go debugger/compiler support

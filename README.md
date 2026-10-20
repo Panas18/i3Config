@@ -4,7 +4,34 @@ Configuration files for i3, i3blocks, Kitty, tmux, zsh and Neovim.
 The macOS terminal/editor configuration is on `macos`.
 
 This branch includes desktop configuration and the runtime helpers in `bin/`.
-Installers, test scripts, binaries and vendored plugins are not included.
+An interactive Ubuntu installer, regression tests and a licensed vendored network menu are included. Compiled binaries are not tracked.
+
+## Install on a new Ubuntu PC
+
+Use [install.sh](install.sh) from a complete checkout of the `linux` branch.
+Run it as the normal login user, without putting `sudo` before the script:
+
+```sh
+./install.sh --dry-run          # Read-only package/source/configuration plan
+./install.sh                    # Interactive desktop installation
+# Or include the optional editor/development tools:
+./install.sh --with-editor
+```
+
+It configures **i3 → Polybar → Kitty → tmux → zsh → desktop tools → Eww**,
+then Neovim if selected. Each stage lists package names, candidate versions,
+APT's dependency transaction and configuration scope before asking permission.
+Existing files are backed up; timestamped logs, source revisions and installed
+package versions are recorded under `~/.local/state/i3config/install/`.
+
+Target: **Ubuntu Desktop 26.04+**, Intel or AMD **amd64**. ARM64 uses native
+packages/builds but remains hardware-untested. No Intel-specific binary, GPU
+driver installer or copied monitor profile is used. `--backend xrender` provides
+a Picom alternative for problematic graphics drivers. Eww builds with one
+worker by default (`--jobs 2` is available); its build can take time/disk space.
+
+Read [docs/installation.md](docs/installation.md) for prerequisites, prompts,
+package/source manifests, CPU/GPU compatibility, backups and validation limits.
 
 ## Desktop helpers
 
