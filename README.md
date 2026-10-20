@@ -171,3 +171,8 @@ Profiles contain hardware-specific display identifiers and stay in
 runs `autorandr --change` once when connected outputs change, then enforces
 lid safety and refreshes Polybar/wallpaper. Avoid adding a second autorandr
 polling loop. Unplug/open-lid handling still restores the laptop display.
+
+Polybar appearance uses a 40px inset panel with rounded corners, grouped
+status tiles and an accented active workspace. Left-click the rocket to launch
+apps; right-click it for power actions. The sliders button opens the control
+center. Edit `polybar/config.ini` to change colors, spacing or module styling.
