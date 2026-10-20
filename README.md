@@ -174,11 +174,11 @@ Polybar uses Fira Code, DejaVu Sans and FontAwesome (monochrome icons).
 The panel uses three separate rounded Mocha islands, with 12px gutters:
 
 - **Left:** application launcher, CopyQ clipboard history, Flameshot screenshot
-  selection, i3 workspaces and the active window title.
+  selection, a Blueman launcher, i3 workspaces and the active window title.
 - **Center:** previous/play-pause/next, a bounded MPRIS track title and date/time.
 - **Right:** CPU, memory, temperature, brightness, volume, battery and quick settings.
 
-Wi-Fi names, Bluetooth and the tray are removed from the bar. Network and Bluetooth
+Wi-Fi names, Bluetooth status readouts and the tray are removed from the bar. Network and Bluetooth
 settings live in quick settings (sliders icon or Super+S). Power actions are there
 too, with the existing confirmation for shutdown/reboot/logout.
 Scroll sound/brightness to change levels; right-click sound to mute; left-click
@@ -189,7 +189,8 @@ players first, then paused players, with Spotify preferred for ties. A stopped
 browser cannot hide paused Spotify. Media keys use the same selection helper.
 When no MPRIS player is running it displays “Nothing playing”. Track metadata is
 sanitized before Polybar renders it. CopyQ toggles its clipboard window; the
-camera opens Flameshot selection (Escape cancels without capturing).
+camera opens Flameshot selection (Escape cancels without capturing). The blue
+Bluetooth icon beside it opens Blueman directly, without status polling.
 
 `i3-polybar` calculates widths from the primary monitor and supervises the whole
 group. A transparent dock reserves one 56px row; the three visible bars use
