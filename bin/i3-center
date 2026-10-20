@@ -17,8 +17,9 @@ done
 $ready || { notify-send 'Control center' 'Widget service did not start.'; exit 1; }
 if [[ ${1:-} == launch ]]; then
   case ${2:-} in
-    network) command='nm-connection-editor' ;;
-    bluetooth) command='blueman-manager' ;;
+    network) command="$HOME/.local/bin/i3-settings network" ;;
+    bluetooth) command="$HOME/.local/bin/i3-settings bluetooth" ;;
+    settings) command="$HOME/.local/bin/i3-settings" ;;
     power) command="$HOME/.local/bin/i3-power-menu" ;;
     *) exit 2 ;;
   esac

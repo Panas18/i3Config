@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if command -v lxappearance >/dev/null; then exec lxappearance "$@"; fi
+export XDG_DATA_DIRS="$HOME/.local/opt/lxappearance/usr/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+exec "$HOME/.local/opt/lxappearance/usr/bin/lxappearance" "$@"

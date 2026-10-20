@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Desktop Settings
+Comment=Lightweight i3 settings and tools
+Exec=i3-settings
+Icon=preferences-system
+Terminal=false
+Categories=Settings;

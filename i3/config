@@ -49,8 +49,8 @@ bindsym XF86AudioMicMute exec --no-startup-id ~/.local/bin/i3-control mic-mute
 bindsym XF86MonBrightnessUp exec --no-startup-id ~/.local/bin/i3-control brightness-up
 bindsym XF86MonBrightnessDown exec --no-startup-id ~/.local/bin/i3-control brightness-down
 bindsym $mod+Ctrl+m exec pavucontrol --tab=3
-bindsym $mod+Ctrl+b exec blueman-manager
-bindsym $mod+Ctrl+n exec nm-connection-editor
+bindsym $mod+Ctrl+b exec --no-startup-id ~/.local/bin/i3-settings bluetooth
+bindsym $mod+Ctrl+n exec --no-startup-id ~/.local/bin/i3-settings network
 bindsym $mod+Ctrl+w exec ~/.local/bin/i3-wallpaper --choose
 bindsym Print exec --no-startup-id flameshot gui -c -p ~/Pictures/Screenshots/
 bindsym Shift+Print exec --no-startup-id flameshot full -c -p ~/Pictures/Screenshots/
@@ -315,3 +315,10 @@ for_window [class="(?i)zenity" title="Calendar"] floating enable, border normal,
 bindsym $mod+Ctrl+v exec copyq toggle
 bindsym $mod+s exec --no-startup-id ~/.local/bin/i3-center
 for_window [class="(?i)copyq"] floating enable, border normal, resize set 800 550, move position center
+
+# Searchable settings hub; tools run only when selected.
+bindsym $mod+Ctrl+s exec --no-startup-id ~/.local/bin/i3-settings
+for_window [class="(?i)lxappearance"] floating enable, border normal, move position center
+for_window [class="(?i)arandr"] floating enable, border normal, move position center
+
+for_window [class="I3Calendar"] floating enable, border pixel 0

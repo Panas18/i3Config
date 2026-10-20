@@ -77,5 +77,60 @@ class AutorandrTests(unittest.TestCase):
             run.assert_not_called()
 
 
+class SettingsTests(unittest.TestCase):
+    def setUp(self):
+        self.settings = helper('i3-settings')
+
+    def test_device_rows_include_only_saved_or_connected_and_sort_connected_first(self):
+        rows = self.settings.bluetooth_rows({
+            '/ignored': {'org.bluez.Device1': {'Alias': 'Nearby beacon'}},
+            '/saved': {'org.bluez.Device1': {'Alias': 'Headphones', 'Paired': True}},
+            '/connected': {'org.bluez.Device1': {'Alias': 'Speaker\n%{bad}', 'Connected': True}},
+        })
+        self.assertEqual([row[0] for row in rows], ['/connected', '/saved'])
+        self.assertNotIn('\n', rows[0][1])
+        self.assertEqual(rows[0][2], True)
+
+    def test_menu_cancellation_and_invalid_indices_do_not_select_actions(self):
+        for code, value in [(1, ''), (0, '-1'), (0, '999'), (0, 'not a number')]:
+            result = type('Result', (), {'returncode': code, 'stdout': value})()
+            with patch.object(self.settings.subprocess, 'run', return_value=result):
+                self.assertIsNone(self.settings.menu('Test', ['one', 'two']))
+
+    def test_cancelled_notifications_menu_does_not_change_state(self):
+        with patch.object(self.settings, 'run', return_value='false') as run, \
+             patch.object(self.settings, 'menu', return_value=None):
+            self.settings.notifications()
+            run.assert_called_once_with('dunstctl', 'is-paused')
+
+    def test_cancelled_hub_does_not_launch_tool(self):
+        with patch('sys.argv', ['i3-settings']), \
+             patch.object(self.settings, 'run', return_value='balanced'), \
+             patch.object(self.settings, 'menu', return_value=None), \
+             patch.object(self.settings, 'launch') as launch:
+            self.settings.main()
+            launch.assert_not_called()
+
+
+class CalendarTests(unittest.TestCase):
+    def setUp(self):
+        self.calendar = helper('i3-calendar')
+
+    def test_month_navigation_crosses_year_boundaries(self):
+        self.assertEqual(self.calendar.shift_month(2026, 12, 1), (2027, 1))
+        self.assertEqual(self.calendar.shift_month(2026, 1, -1), (2025, 12))
+
+    def test_leap_month_is_complete_and_grid_always_six_weeks(self):
+        weeks = self.calendar.month_cells(2024, 2)
+        self.assertEqual(len(weeks), 6)
+        self.assertTrue(all(len(week) == 7 for week in weeks))
+        self.assertEqual(weeks[0][0].weekday(), 0)
+        self.assertEqual(sum(day.month == 2 for week in weeks for day in week), 29)
+
+    def test_century_non_leap_year(self):
+        weeks = self.calendar.month_cells(2100, 2)
+        self.assertEqual(sum(day.month == 2 for week in weeks for day in week), 28)
+
+
 if __name__ == '__main__':
     unittest.main()

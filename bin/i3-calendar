@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+"""A small, single-instance GTK3 calendar. Exits when focus is lost."""
+import calendar
+import datetime as dt
+import sys
+
+
+def month_cells(year, month):
+    weeks = calendar.Calendar(firstweekday=0).monthdatescalendar(year, month)
+    while len(weeks) < 6:
+        weeks.append([weeks[-1][-1] + dt.timedelta(days=i) for i in range(1, 8)])
+    return weeks
+
+
+def shift_month(year, month, step):
+    year, month = divmod(year*12 + month-1 + step, 12)
+    return year, month+1
+
+
+def main():
+    import gi
+    gi.require_version('Gtk', '3.0')
+    from gi.repository import Gtk, Gdk, Gio
+
+    class CalendarApp(Gtk.Application):
+        def __init__(self):
+            super().__init__(application_id='org.i3config.Calendar', flags=Gio.ApplicationFlags.FLAGS_NONE)
+            self.window = None
+            self.today = dt.date.today()
+            self.selected = self.today
+            self.year, self.month = self.today.year, self.today.month
+
+        def do_activate(self):
+            if self.window is not None:
+                self.window.destroy()
+                return
+            provider = Gtk.CssProvider()
+            provider.load_from_data(b'''
+              window { background: transparent; }
+              .panel { background: #1e1e2e; color: #cdd6f4; border: 1px solid #45475a;
+                       border-radius: 14px; padding: 18px; }
+              * { font-family: "DejaVu Sans"; font-size: 13px; color: #cdd6f4; }
+              button { background: transparent; background-image: none; box-shadow: none;
+                       border: none; border-radius: 8px; padding: 6px; }
+              button:hover, button:focus { background: #313244; }
+              button:focus { outline-color: #89b4fa; }
+              .month { font-size: 18px; font-weight: bold; }
+              .weekday, .caption { color: #9399b2; font-size: 11px; }
+              .muted { color: #585b70; }
+              .today { color: #89b4fa; font-weight: bold; }
+              .selected { background: #89b4fa; color: #1e1e2e; font-weight: bold; }
+              .muted label { color: #585b70; }
+              .today label { color: #89b4fa; }
+              .selected label { color: #1e1e2e; }
+              .today-button { background: #313244; }
+              .today-button label { color: #a6e3a1; }
+            ''')
+            Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), provider, 600)
+            self.window = Gtk.ApplicationWindow(application=self)
+            self.window.set_title('Calendar')
+            self.window.set_wmclass('i3-calendar', 'I3Calendar')
+            self.window.set_type_hint(Gdk.WindowTypeHint.DIALOG)
+            self.window.set_decorated(False)
+            self.window.set_resizable(False)
+            self.window.set_skip_taskbar_hint(True)
+            visual = self.window.get_screen().get_rgba_visual()
+            if visual:
+                self.window.set_visual(visual)
+            self.window.connect('destroy', lambda *_: self.quit())
+            self.window.connect('focus-out-event', lambda *_: self.window.destroy())
+            self.window.connect('key-press-event', self.key)
+            panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+            panel.get_style_context().add_class('panel')
+            self.window.add(panel)
+            header = Gtk.Box(spacing=8)
+            panel.pack_start(header, False, False, 0)
+            self.month_label = Gtk.Label(xalign=0)
+            self.month_label.get_style_context().add_class('month')
+            header.pack_start(self.month_label, True, True, 0)
+            for text, callback in [('‹', lambda *_: self.navigate(-1)),
+                                   ('›', lambda *_: self.navigate(1)),
+                                   ('×', lambda *_: self.window.destroy())]:
+                button = Gtk.Button(label=text)
+                button.connect('clicked', callback)
+                header.pack_start(button, False, False, 0)
+            self.grid = Gtk.Grid(column_homogeneous=True, row_spacing=4, column_spacing=4)
+            panel.pack_start(self.grid, False, False, 0)
+            footer = Gtk.Box(spacing=12)
+            self.caption = Gtk.Label(xalign=0)
+            self.caption.get_style_context().add_class('caption')
+            footer.pack_start(self.caption, True, True, 0)
+            today = Gtk.Button(label='Today')
+            today.get_style_context().add_class('today-button')
+            today.connect('clicked', self.reset)
+            footer.pack_start(today, False, False, 0)
+            panel.pack_start(footer, False, False, 0)
+            self.render()
+            self.window.show_all()
+            display = Gdk.Display.get_default()
+            monitor = display.get_primary_monitor() or display.get_monitor(0)
+            rect = monitor.get_geometry()
+            width, _ = self.window.get_size()
+            self.window.move(rect.x + (rect.width-width)//2, rect.y+58)
+            self.window.present()
+
+        def render(self):
+            for child in self.grid.get_children():
+                self.grid.remove(child)
+            self.month_label.set_text(dt.date(self.year, self.month, 1).strftime('%B %Y'))
+            self.caption.set_text(self.selected.strftime('%a, %d %b %Y'))
+            for column, name in enumerate(('Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su')):
+                label = Gtk.Label(label=name)
+                label.get_style_context().add_class('weekday')
+                self.grid.attach(label, column, 0, 1, 1)
+            for row, week in enumerate(month_cells(self.year, self.month), 1):
+                for column, date in enumerate(week):
+                    button = Gtk.Button(label=str(date.day))
+                    button.set_size_request(38, 32)
+                    style = button.get_style_context()
+                    if date.month != self.month:
+                        style.add_class('muted')
+                    if date == self.today:
+                        style.add_class('today')
+                    if date == self.selected:
+                        style.add_class('selected')
+                    button.connect('clicked', self.select, date)
+                    self.grid.attach(button, column, row, 1, 1)
+            self.grid.show_all()
+            self.window.queue_draw()
+
+        def navigate(self, step):
+            self.year, self.month = shift_month(self.year, self.month, step)
+            self.render()
+
+        def select(self, _, date):
+            self.selected = date
+            self.year, self.month = date.year, date.month
+            self.render()
+
+        def reset(self, *_):
+            self.today = self.selected = dt.date.today()
+            self.year, self.month = self.today.year, self.today.month
+            self.render()
+
+        def key(self, _, event):
+            if event.keyval == Gdk.KEY_Escape:
+                self.window.destroy()
+            elif event.keyval == Gdk.KEY_Page_Up:
+                self.navigate(-1)
+            elif event.keyval == Gdk.KEY_Page_Down:
+                self.navigate(1)
+            return False
+
+    CalendarApp().run(sys.argv)
+
+
+if __name__ == '__main__':
+    main()

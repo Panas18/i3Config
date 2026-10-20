@@ -89,12 +89,13 @@ Alt+l accepts a Copilot suggestion.
 - Super+Shift+c: reload i3. Separate lock, sleep, shutdown and restart shortcuts are removed; use the power menu.
 - Super+U / Super+N: volume up/down on the playback output. Alt+U / Alt+N also work.
 - Media and brightness keys use the installed runtime helpers.
-- Bar order: network name, battery, sound, brightness, temperature, CPU,
+- Optional i3blocks fallback order: network name, battery, sound, brightness, temperature, CPU,
   RAM, storage, Bluetooth, network traffic, then full date/time.
   RAM/disk/CPU use four-cell usage graphs. Sound icons follow volume/mute;
   battery shows 🔌 when charging/full and 🪫 when low.
   Bluetooth × means off/unavailable, ✓ means on, and a number counts connected
-  devices. Traffic uses K/M for KiB/s/MiB/s. Use nm-applet in the primary display’s system tray to select Wi-Fi networks. Click the network name or traffic, or press Super+Ctrl+N, for the floating connection editor; click Bluetooth for the floating Blueman manager.
+  devices. Traffic uses K/M for KiB/s/MiB/s. The active Polybar setup uses
+  three islands instead; Super+Ctrl+N/B opens the on-demand network/Bluetooth menus.
   Volume/brightness changes show short progress notifications (requires dunstify,
   provided by Dunst); repeated changes replace the previous popup.
   Signals 10 and 11 refresh brightness and volume.
@@ -127,28 +128,28 @@ Dunst theme: copy `dunst/dunstrc` to `~/.config/dunst/dunstrc` and run
 remain until dismissed. Right-click dismisses one, middle-click dismisses all,
 and left-click runs the default action when available. Media popups have
 progress bars and are excluded from history. `dunstctl history-pop` recalls
-a notification. Click the clock for a floating calendar (requires `zenity`).
+a notification. Click the clock for the matching on-demand GTK3 calendar.
 
 ## Desktop polish
 
 Copy `picom/`, `rofi/`, and `eww/` into `~/.config/` alongside the other
-configuration folders. Picom uses subtle shadows/fades with no blur.
+configuration folders. Picom uses subtle shadows with no blur or fades.
 Super+Ctrl+V opens CopyQ clipboard history; Super+V keeps its i3 split action.
 Super+S toggles the Eww control center. CopyQ is started at login; Eww starts
 on demand through `systemd/user/i3-eww.service` (copy it to
 `~/.config/systemd/user/` and run `systemctl --user daemon-reload`). Install CopyQ and build Eww with X11 support if unavailable in apt.
-The quick-settings panel contains only Network, Bluetooth and Power. It closes
+The quick-settings panel contains Network, Bluetooth, All settings and Power. It closes
 when another window or workspace gains focus, and closes before launching a tool.
 `i3-center-watch` subscribes to i3 events while the panel is open; it does not poll
 in the background. Copy this helper along with `i3-center`.
 
-Picom uses the accelerated GLX backend with subtle shadows, short fades and
+Picom uses the accelerated GLX backend with subtle shadows, no fades and
 10px window corners. `i3-picom.service` starts with the session and restarts on
 failure. Copy the service to `~/.config/systemd/user/`, reload systemd, stop any
 old manually launched Picom instance, and run `systemctl --user start i3-picom`.
 Use `journalctl --user -u i3-picom -b` for diagnostics. If another graphics driver
 has GLX problems, change `backend` to `"xrender"` in `picom/picom.conf` and restart
-the service. Fullscreen unredirection is disabled to keep compositing consistent.
+the service. Opaque fullscreen apps bypass compositing after a 300ms delay.
 
 Eww build used: official tag `v0.6.0`, with the locked `time` dependency
 updated from 0.3.34 to 0.3.36 for compatibility with the installed Rust compiler.
@@ -181,7 +182,7 @@ Wi-Fi names, Bluetooth and the tray are removed from the bar. Network and Blueto
 settings live in quick settings (sliders icon or Super+S). Power actions are there
 too, with the existing confirmation for shutdown/reboot/logout.
 Scroll sound/brightness to change levels; right-click sound to mute; left-click
-sound to choose an output. Click the date to toggle its detail. The launcher opens
+sound to choose an output. Click the date/time to open the calendar. The launcher opens
 apps on left click and the window switcher on right click. Music uses `playerctl` event streams, so the play/pause icon updates immediately
 when playback changes. Controls and metadata select the same player: playing
 players first, then paused players, with Spotify preferred for ties. A stopped
@@ -217,7 +218,7 @@ The postswitch hook refreshes the saved wallpaper, ensures Picom is running and
 restarts Polybar after manual Autorandr switches. When the display watcher calls
 Autorandr, it handles that refresh once after enforcing lid safety instead.
 Software brightness/gamma are preserved across profile changes. Picom draws
-soft 18px shadows; the wallpaper is restored by `feh` through `i3-wallpaper`.
+soft 14px shadows; the wallpaper is restored by `feh` through `i3-wallpaper`.
 Flameshot's selection overlay is excluded from shadows, rounding and fades.
 
 Validate the helper regressions with `python3 -m unittest discover -s tests -v`.
@@ -225,3 +226,15 @@ Validate the helper regressions with `python3 -m unittest discover -s tests -v`.
 Edit `polybar/config.ini` for colors and modules, `bin/i3-polybar` for geometry,
 and `eww/eww.scss` for quick-settings styling. After copying changes into the
 runtime directories, restart `i3-polybar.service` and run `eww reload`.
+
+## Lightweight settings and calendar
+
+Super+S opens quick settings. **All settings**, **Super+Ctrl+S**, or the
+**Desktop Settings** application opens the searchable Mocha settings hub.
+Network/Bluetooth buttons and Super+Ctrl+N/B use the matching menus. Click the
+clock for a local calendar with month arrows, PageUp/PageDown, date selection
+and Today. Escape or outside focus closes it. It runs only while visible and
+uses GTK3 already present on this machine; no accounts, sync or extra service.
+
+The researched feature list, resource decisions, installation steps and source
+links are in [docs/lightweight-desktop.md](docs/lightweight-desktop.md).

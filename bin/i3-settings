@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+"""On-demand settings for i3: no resident process, polling or shell interpolation."""
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+
+HOME = Path.home()
+BIN = HOME/'.local/bin'
+CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', str(HOME/'.config')))
+DATA = Path(os.environ.get('XDG_DATA_HOME', str(HOME/'.local/share')))
+
+
+def run(*args, timeout=5):
+    try:
+        result = subprocess.run(args, capture_output=True, text=True, timeout=timeout)
+        return result.stdout.strip() if result.returncode == 0 else ''
+    except (OSError, subprocess.TimeoutExpired):
+        return ''
+
+
+def clean(text):
+    return ' '.join(str(text).replace('\0', '').split())
+
+
+def menu(title, rows, message='Esc to close · type to filter'):
+    if not rows:
+        return None
+    result = subprocess.run(['rofi', '-dmenu', '-i', '-no-custom', '-format', 'i',
+                             '-p', title, '-theme', 'settings', '-mesg', message],
+                            input='\n'.join(clean(row) for row in rows)+'\n',
+                            capture_output=True, text=True)
+    value = result.stdout.strip()
+    if result.returncode == 0 and value.isdigit() and int(value) < len(rows):
+        return int(value)
+    return None
+
+
+def launch(*args):
+    if not shutil.which(args[0]):
+        subprocess.run(['notify-send', 'Settings', f'{args[0]} is not installed'], check=False)
+        return
+    os.execvp(args[0], list(args))
+
+
+def bluetooth_rows(objects):
+    devices = []
+    for path, interfaces in objects.items():
+        device = interfaces.get('org.bluez.Device1', {})
+        if device.get('Paired') or device.get('Connected'):
+            devices.append((str(path), clean(device.get('Alias', device.get('Address', 'Device'))),
+                            bool(device.get('Connected'))))
+    return sorted(devices, key=lambda device: (not device[2], device[1].casefold()))
+
+
+def bluetooth():
+    import dbus
+    try:
+        bus = dbus.SystemBus()
+        objects = dbus.Interface(bus.get_object('org.bluez', '/'),
+                                 'org.freedesktop.DBus.ObjectManager').GetManagedObjects(timeout=5)
+        adapters = [(path, values['org.bluez.Adapter1']) for path, values in objects.items()
+                    if 'org.bluez.Adapter1' in values]
+    except dbus.DBusException:
+        launch('blueman-manager')
+        return
+    if not adapters:
+        if menu('Bluetooth', ['Open Blueman settings'], 'No Bluetooth adapter detected · check hardware or rfkill') == 0:
+            launch('blueman-manager')
+        return
+    devices = bluetooth_rows(objects)
+    rows = [('● ' if connected else '○ ') + name + ('  · connected' if connected else '')
+            for _, name, connected in devices]
+    powered = bool(adapters and adapters[0][1].get('Powered'))
+    if adapters:
+        rows.append('Turn Bluetooth ' + ('off' if powered else 'on'))
+    rows.append('＋ Pair a new device / advanced settings')
+    index = menu('Bluetooth', rows, 'Select a saved device to connect/disconnect · no background scanning')
+    if index is None:
+        return
+    try:
+        if index < len(devices):
+            path, name, connected = devices[index]
+            device = dbus.Interface(bus.get_object('org.bluez', path), 'org.bluez.Device1')
+            (device.Disconnect if connected else device.Connect)(timeout=20)
+        elif adapters and index == len(devices):
+            dbus.Interface(bus.get_object('org.bluez', adapters[0][0]),
+                           'org.freedesktop.DBus.Properties').Set(
+                               'org.bluez.Adapter1', 'Powered', dbus.Boolean(not powered), timeout=5)
+        else:
+            launch('blueman-manager')
+    except dbus.DBusException as error:
+        subprocess.run(['notify-send', 'Bluetooth', clean(error.get_dbus_message())], check=False)
+
+
+def notifications():
+    paused = run('dunstctl', 'is-paused') == 'true'
+    rows = [('Resume notifications' if paused else 'Pause notifications'),
+            'Show last notification', 'Dismiss visible notifications']
+    index = menu('Notifications', rows)
+    if index == 0:
+        run('dunstctl', 'set-paused', 'false' if paused else 'true')
+    elif index == 1:
+        run('dunstctl', 'history-pop')
+    elif index == 2:
+        run('dunstctl', 'close-all')
+
+
+def displays():
+    profiles = [name for name in run('autorandr', '--list').splitlines()
+                if re.fullmatch(r'[\w.-]+', name)]
+    closed = any('closed' in p.read_text().lower() for p in Path('/proc/acpi/button/lid').glob('*/state'))
+    if closed:
+        profiles = [p for p in profiles if p != 'laptop']
+    index = menu('Displays', ['Arrange displays · ARandR'] + ['Load layout · '+p for p in profiles],
+                 'Layouts restore wallpaper and Polybar automatically')
+    if index == 0:
+        launch('arandr')
+    elif index is not None:
+        # Reuse the watcher's lid safety and shared refresh path.
+        run('autorandr', '--load', profiles[index-1], timeout=25)
+
+
+def power_profiles():
+    available = run('powerprofilesctl', 'list')
+    profiles = [p for p in ('power-saver', 'balanced', 'performance')
+                if re.search(r'^\s*\*?\s*'+p+r':', available, re.M)]
+    current = run('powerprofilesctl', 'get')
+    index = menu('Power profile', [p + ('  · active' if p == current else '') for p in profiles],
+                 'Power saver favors battery life · changes only when selected')
+    if index is not None:
+        run('powerprofilesctl', 'set', profiles[index])
+
+
+def shortcuts():
+    menu('Keyboard shortcuts', [
+        'Super + S                         Quick settings',
+        'Super + Ctrl + S                  All settings',
+        'Super + Space                     Applications',
+        'Super + Tab                       Window switcher',
+        'Super + Ctrl + N                   Network menu',
+        'Super + Ctrl + B                   Bluetooth menu',
+        'Super + Ctrl + M                   Audio outputs',
+        'Super + Ctrl + W                   Wallpaper',
+        'Super + Ctrl + V                   Clipboard history',
+        'Print                             Screenshot selection',
+        'Super + Shift + E                  Power menu',
+    ], 'Shortcut reference · Esc to close')
+
+
+def main():
+    os.environ['PATH'] = str(BIN)+os.pathsep+os.environ.get('PATH', '')
+    section = sys.argv[1] if len(sys.argv) > 1 else ''
+    handlers = {'bluetooth': bluetooth, 'notifications': notifications, 'displays': displays,
+                'power-profiles': power_profiles, 'shortcuts': shortcuts}
+    if section in handlers:
+        handlers[section]()
+    elif section == 'network':
+        script = DATA/'i3config/vendor/networkmanager-dmenu/networkmanager_dmenu'
+        if script.is_file():
+            launch('python3', str(script), '--config', str(CONFIG/'networkmanager-dmenu/config.ini'))
+        else:
+            launch('nm-connection-editor')
+    else:
+        actions = [
+            ('  Network & Wi-Fi', [str(BIN/'i3-settings'), 'network']),
+            ('  Bluetooth devices', [str(BIN/'i3-settings'), 'bluetooth']),
+            ('  Sound & audio outputs', ['pavucontrol', '--tab=3']),
+            ('  Displays & saved layouts', [str(BIN/'i3-settings'), 'displays']),
+            ('  Appearance · themes, icons & fonts', [str(BIN/'i3-appearance')]),
+            ('  Calendar', [str(BIN/'i3-calendar')]),
+            ('  Wallpaper', [str(BIN/'i3-wallpaper'), '--choose']),
+            ('  Notifications', [str(BIN/'i3-settings'), 'notifications']),
+            ('  Clipboard history', ['copyq', 'toggle']),
+            ('  Screenshot', ['flameshot', 'gui']),
+            ('  Task manager · htop', ['kitty', '--title', 'System monitor', 'htop']),
+            ('  Disk usage', ['baobab']),
+            ('  Keyboard shortcuts', [str(BIN/'i3-settings'), 'shortcuts']),
+            ('  Lock, suspend & power', [str(BIN/'i3-power-menu')]),
+        ]
+        if run('powerprofilesctl', 'get'):
+            actions.insert(6, ('  Power profile', [str(BIN/'i3-settings'), 'power-profiles']))
+        actions = [(label, args) for label, args in actions if shutil.which(args[0])]
+        index = menu('Settings', [label for label, _ in actions],
+                     'Lightweight desktop tools · launched only when needed')
+        if index is not None:
+            launch(*actions[index][1])
+
+
+if __name__ == '__main__':
+    main()

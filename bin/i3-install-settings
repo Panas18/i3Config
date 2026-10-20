@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# User-local installation; no desktop suite or extra login daemon.
+set -euo pipefail
+source_root=${1:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}
+share_root="${XDG_DATA_HOME:-$HOME/.local/share}"
+config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
+mkdir -p "$HOME/.local/bin" "$share_root/i3config/vendor/networkmanager-dmenu" "$config_root/networkmanager-dmenu" "$config_root/rofi"
+install -m755 "$source_root/bin/i3-settings" "$source_root/bin/i3-calendar" "$HOME/.local/bin/"
+install -m755 "$source_root/vendor/networkmanager-dmenu/networkmanager_dmenu" "$share_root/i3config/vendor/networkmanager-dmenu/"
+install -m644 "$source_root/vendor/networkmanager-dmenu/LICENSE.txt" "$source_root/vendor/networkmanager-dmenu/UPSTREAM.md" "$share_root/i3config/vendor/networkmanager-dmenu/"
+# Preserve existing preferences. Explicit configuration updates can be copied later.
+for item in networkmanager-dmenu/config.ini rofi/settings.rasi rofi/modern.rasi; do
+  [[ -f $config_root/$item ]] || install -m644 "$source_root/$item" "$config_root/$item"
+done
+if ! command -v lxappearance >/dev/null; then
+  prefix="$HOME/.local/opt/lxappearance"
+  if [[ ! -f $prefix/.i3config-local-build ]]; then
+    pkg-config --exists gtk+-3.0 gmodule-2.0 x11 || {
+      echo 'Install lxappearance with apt, or provide gcc and GTK3 development headers for a user-local build.' >&2
+      exit 1
+    }
+    task_tmp=$(mktemp -d)
+    trap 'rm -rf -- "$task_tmp"' EXIT
+    (cd "$task_tmp" && apt-get download lxappearance)
+    mkdir -p "$prefix"
+    dpkg-deb --extract "$task_tmp"/*.deb "$prefix"
+    # The distro binary hardcodes /usr/share. Rebuild the small executable with
+    # this user's data path; no root write, settings daemon or full desktop.
+    git clone --quiet https://github.com/lxde/lxappearance.git "$task_tmp/source"
+    git -C "$task_tmp/source" checkout --quiet dc5d5b313c9c46e91e9205b54ae6ad92e7910f64
+    read -r -a gtk_flags <<< "$(pkg-config --cflags --libs gtk+-3.0 gmodule-2.0 x11)"
+    gcc -O2 -Wno-deprecated-declarations -DGETTEXT_PACKAGE='"lxappearance"' -DENABLE_DBUS=0 \
+      "-DPACKAGE_UI_DIR=\"$prefix/usr/share/lxappearance/ui\"" \
+      "-DPACKAGE_DATA_DIR=\"$prefix/usr/share/lxappearance\"" \
+      "-DPACKAGE_LIB_DIR=\"$prefix/usr/lib\"" \
+      "$task_tmp/source"/src/*.c "${gtk_flags[@]}" -o "$prefix/usr/bin/lxappearance"
+    # Preserve the pinned source and license alongside the local GPL binary.
+    mkdir -p "$prefix/source"
+    cp -a "$task_tmp/source/src" "$task_tmp/source/COPYING" "$prefix/source/"
+    touch "$prefix/.i3config-local-build"
+  fi
+fi
+install -m755 "$source_root/bin/i3-appearance" "$HOME/.local/bin/"
+mkdir -p "$share_root/applications"
+install -m644 "$source_root/applications/i3-settings.desktop" "$share_root/applications/"
+echo 'Installed on-demand settings, network menu and LXAppearance. No new background services.'

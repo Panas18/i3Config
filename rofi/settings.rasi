@@ -1,0 +1,8 @@
+@theme "modern"
+window { width: 620px; padding: 20px; }
+inputbar { padding: 14px; }
+entry { placeholder: "Find a setting…"; }
+listview { lines: 9; fixed-height: false; }
+element { padding: 12px 14px; }
+element selected.normal { background-color: #313244; text-color: #89b4fa; }
+message { text-color: #9399b2; padding: 6px 10px; }
