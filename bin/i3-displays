@@ -69,12 +69,8 @@ def apply_layout(items, closed):
                 if external:
                     args += ['--left-of', external[0]['name']]
                 command(*args)
-    # Reload the panel after display changes so it follows the active primary.
-    subprocess.run(['systemctl', '--user', 'try-restart', 'i3-polybar.service'],
-                   capture_output=True, timeout=10)
-    wallpaper = Path.home()/'.local/bin/i3-wallpaper'
-    if wallpaper.exists():
-        command(str(wallpaper))
+    # Restore the desktop only after Autorandr and lid safety have settled.
+    command(str(Path.home()/'.local/bin/i3-desktop-refresh'))
     print(f'{time.strftime("%F %T")} lid={"closed" if closed else "open"} external={[x["name"] for x in external]}', flush=True)
 
 
@@ -107,7 +103,8 @@ def main():
                 connections = tuple(item['name'] for item in items)
                 if connections != previous_connections and shutil.which('autorandr'):
                     # Apply a saved profile once per hardware change, then enforce lid safety.
-                    result = subprocess.run(['autorandr', '--change'], capture_output=True, text=True, timeout=20)
+                    result = subprocess.run(['autorandr', '--change'], capture_output=True, text=True, timeout=20,
+                                            env={**os.environ, 'I3CONFIG_DISPLAY_WATCHER': '1'})
                     if result.returncode:
                         print('Autorandr: '+result.stderr.strip(), flush=True)
                     items = outputs()
@@ -126,7 +123,7 @@ def main():
                 fingerprint = (closed, tuple((x['name'], x['active'], x['primary']) for x in items))
                 if fingerprint != previous:
                     apply_layout(items, closed)
-                    previous = fingerprint
+                    previous = (closed, tuple((x['name'], x['active'], x['primary']) for x in outputs()))
             except (OSError, RuntimeError, subprocess.SubprocessError, ValueError) as exc:
                 print(f'Display update failed: {exc}', flush=True)
                 failures += 1

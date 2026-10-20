@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+"""Create machine-local docked/laptop profiles without switching displays."""
+import os
+from pathlib import Path
+import re
+import subprocess
+
+
+def output(*args):
+    return subprocess.check_output(args, text=True, timeout=10)
+
+
+def main():
+    root = Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home()/'.config')))/'autorandr'
+    root.mkdir(parents=True, exist_ok=True)
+    query = output('xrandr', '--query')
+    connections = []
+    internal = None
+    preferred = None
+    rate = None
+    current = None
+    for line in query.splitlines():
+        match = re.match(r'^(\S+) connected\b(.*)', line)
+        if match:
+            current, details = match.groups()
+            connections.append((current, bool(re.search(r'\d+x\d+\+[-\d]+\+[-\d]+', details))))
+            if current.startswith(('eDP', 'LVDS', 'DSI')) and internal is None:
+                internal = current
+        elif line and not line.startswith(' '):
+            current = None
+        elif current == internal:
+            mode = re.match(r'^\s+(\d+x\d+)\s+(.+)', line)
+            if mode and (preferred is None or '+' in mode[2]):
+                preferred = mode[1]
+                preferred_rate = re.search(r'(\d+(?:\.\d+)?)\s*\*?\s*\+', mode[2])
+                rate = preferred_rate[1] if preferred_rate else mode[2].split()[0].strip('*+')
+    if any(active and not name.startswith(('eDP', 'LVDS', 'DSI')) for name, active in connections):
+        if not (root/'docked').exists():
+            subprocess.run(['autorandr', '--save', 'docked'], check=True, timeout=15)
+    laptop = root/'laptop'
+    if internal and preferred and not laptop.exists():
+        fingerprints = dict(line.split(None, 1) for line in
+                            output('autorandr', '--ignore-lid', '--fingerprint').splitlines())
+        edid = fingerprints.get(internal)
+        if not edid:
+            raise SystemExit(f'No EDID found for {internal}; laptop profile was not created')
+        config = ''.join(f'output {name}\noff\n' for name, _ in connections if name != internal)
+        config += f'output {internal}\nmode {preferred}\npos 0x0\nprimary\nrate {rate}\n'
+        laptop.mkdir()
+        (laptop/'setup').write_text(f'{internal} {edid}\n')
+        (laptop/'config').write_text(config)
+        print(f'Created laptop profile: {internal} {preferred} at {rate}Hz')
+    print(output('autorandr', '--list').strip())
+
+
+if __name__ == '__main__':
+    main()

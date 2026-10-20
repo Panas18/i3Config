@@ -294,12 +294,12 @@ bindsym --release $mod+d exec xkill
 bindsym $mod+y exec kitty ranger
 bindsym $mod+c exec rofi -show run
 bindsym $mod+Shift+c reload
-bindsym XF86AudioPlay exec playerctl play-pause
-bindsym XF86AudioNext exec playerctl next
-bindsym XF86AudioPrev exec playerctl previous
-bindsym $mod1+Shift+k exec playerctl play-pause
-bindsym $mod1+Shift+l exec playerctl next
-bindsym $mod1+Shift+j exec playerctl previous
+bindsym XF86AudioPlay exec --no-startup-id ~/.local/bin/i3-media play-pause
+bindsym XF86AudioNext exec --no-startup-id ~/.local/bin/i3-media next
+bindsym XF86AudioPrev exec --no-startup-id ~/.local/bin/i3-media previous
+bindsym $mod1+Shift+k exec --no-startup-id ~/.local/bin/i3-media play-pause
+bindsym $mod1+Shift+l exec --no-startup-id ~/.local/bin/i3-media next
+bindsym $mod1+Shift+j exec --no-startup-id ~/.local/bin/i3-media previous
 bindsym $mod1+u exec --no-startup-id ~/.local/bin/i3-control volume-up
 bindsym $mod1+n exec --no-startup-id ~/.local/bin/i3-control volume-down
 bindsym $mod1+m exec --no-startup-id ~/.local/bin/i3-control mute

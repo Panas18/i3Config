@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# The display watcher refreshes after enforcing lid safety; avoid doing it twice.
+[[ ${I3CONFIG_DISPLAY_WATCHER:-} != 1 ]] || exit 0
+exec "$HOME/.local/bin/i3-desktop-refresh"

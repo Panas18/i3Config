@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export PATH="$HOME/.local/bin:$PATH"
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/i3-desktop-refresh-$UID.lock"
+flock -n 9 || exit 0
+# Picom composes the windows; feh restores the saved background for this layout.
+systemctl --user import-environment DISPLAY XAUTHORITY
+systemctl --user start i3-picom.service
+systemctl --user try-restart i3-polybar.service
+"$HOME/.local/bin/i3-wallpaper"

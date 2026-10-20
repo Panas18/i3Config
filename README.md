@@ -172,7 +172,8 @@ Polybar uses Fira Code, DejaVu Sans and FontAwesome (monochrome icons).
 
 The panel uses three separate rounded Mocha islands, with 12px gutters:
 
-- **Left:** application launcher, i3 workspaces and the active window title.
+- **Left:** application launcher, CopyQ clipboard history, Flameshot screenshot
+  selection, i3 workspaces and the active window title.
 - **Center:** previous/play-pause/next, a bounded MPRIS track title and date/time.
 - **Right:** CPU, memory, temperature, brightness, volume, battery and quick settings.
 
@@ -181,9 +182,13 @@ settings live in quick settings (sliders icon or Super+S). Power actions are the
 too, with the existing confirmation for shutdown/reboot/logout.
 Scroll sound/brightness to change levels; right-click sound to mute; left-click
 sound to choose an output. Click the date to toggle its detail. The launcher opens
-apps on left click and the window switcher on right click. Music uses `playerctl`;
-when no MPRIS player is running it displays “Nothing playing”. Track metadata is
-sanitized before Polybar renders it.
+apps on left click and the window switcher on right click. Music uses `playerctl` event streams, so the play/pause icon updates immediately
+when playback changes. Controls and metadata select the same player: playing
+players first, then paused players, with Spotify preferred for ties. A stopped
+browser cannot hide paused Spotify. Media keys use the same selection helper.
+When no MPRIS player is running it displays “Nothing playing”. Track metadata is
+sanitized before Polybar renders it. CopyQ toggles its clipboard window; the
+camera opens Flameshot selection (Escape cancels without capturing).
 
 `i3-polybar` calculates widths from the primary monitor and supervises the whole
 group. A transparent dock reserves one 56px row; the three visible bars use
@@ -193,13 +198,29 @@ the brightness readout is omitted and titles are shortened; hardware brightness
 keys still work. Under 1200px, the right island keeps temperature, sound, battery
 and settings. The display watcher restarts the group when outputs change.
 
-Save each desired monitor arrangement with `autorandr --save PROFILE_NAME`.
-The current machine's docked arrangement is saved locally as `docked`.
+Copy `autorandr/settings.ini` and `autorandr/postswitch.d/` into
+`~/.config/autorandr/`, preserving executable permissions on the hook. Install
+`bin/i3-autorandr-setup` and `bin/i3-desktop-refresh` with the other helpers.
+Run `i3-autorandr-setup` once to create machine-local profiles without switching
+screens. It preserves existing profiles, saves an active external arrangement as
+`docked` if missing, and derives a `laptop` profile from the internal display's
+preferred mode and EDID. No laptop output is enabled while the lid is closed.
+
+Save additional arrangements with `autorandr --save PROFILE_NAME`.
+The current machine has both `docked` and `laptop` profiles.
 Profiles contain hardware-specific display identifiers and stay in
 `~/.config/autorandr/`, outside this repository. The existing display watcher
 runs `autorandr --change` once when connected outputs change, then enforces
 lid safety and refreshes Polybar/wallpaper. Avoid adding a second autorandr
 polling loop. Unplug/open-lid handling still restores the laptop display.
+The postswitch hook refreshes the saved wallpaper, ensures Picom is running and
+restarts Polybar after manual Autorandr switches. When the display watcher calls
+Autorandr, it handles that refresh once after enforcing lid safety instead.
+Software brightness/gamma are preserved across profile changes. Picom draws
+soft 18px shadows; the wallpaper is restored by `feh` through `i3-wallpaper`.
+Flameshot's selection overlay is excluded from shadows, rounding and fades.
+
+Validate the helper regressions with `python3 -m unittest discover -s tests -v`.
 
 Edit `polybar/config.ini` for colors and modules, `bin/i3-polybar` for geometry,
 and `eww/eww.scss` for quick-settings styling. After copying changes into the
