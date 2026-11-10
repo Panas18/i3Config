@@ -16,6 +16,3 @@ if [[ $1 == brightness-* ]]; then
   pkill -u "$UID" -RTMIN+10 -x i3blocks || true
 fi
 if [[ $1 != brightness-* ]]; then pkill -u "$UID" -RTMIN+11 -x i3blocks || true; fi
-
-# Replace the previous popup rather than queueing repeated key events.
-"$HOME/.local/bin/i3-notify" "$1" >/dev/null 2>&1 &
